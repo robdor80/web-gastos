@@ -55,18 +55,9 @@
 
             <main class="main-content">
                 <div class="dashboard-grid">
-                    <div class="card bbva">
-                        <span class="bank-label">BBVA Principal</span>
-                        <span class="balance" id="saldo-bbva">...</span>
-                    </div>
-                    <div class="card ing">
-                        <span class="bank-label">Ahorro ING</span>
-                        <span class="balance" id="saldo-ing">...</span>
-                    </div>
-                    <div class="card pension">
-                        <span class="bank-label">Plan Pensiones</span>
-                        <span class="balance" id="saldo-pension">...</span>
-                    </div>
+                    <div class="card bbva"><span class="bank-label">BBVA Principal</span><span class="balance" id="saldo-bbva">0,00 €</span></div>
+                    <div class="card ing"><span class="bank-label">Ahorro ING</span><span class="balance" id="saldo-ing">0,00 €</span></div>
+                    <div class="card pension"><span class="bank-label">Plan Pensiones</span><span class="balance" id="saldo-pension">0,00 €</span></div>
                 </div>
                 <div id="dynamic-content">
                     <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>
@@ -97,7 +88,9 @@
         import { IncomeForm } from './js/components/incomeForm.js';
         import { DbService } from './js/firebase/db.js';
 
-        // Eventos básicos
+        const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+
+        // 1. ASIGNACIÓN DE EVENTOS
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
@@ -112,63 +105,51 @@
         document.getElementById('menu-open').onclick = () => sideMenu.classList.remove('hidden');
         document.getElementById('menu-close').onclick = () => sideMenu.classList.add('hidden');
 
-        // FUNCIÓN MAESTRA DE SALDOS
-        const actualizarDashboard = () => {
-            const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+        // 2. FUNCIÓN PARA PINTAR DATOS (Síncrona para que sea instantánea)
+        const mostrarSaldosActuales = (movements = []) => {
+            let saldoBBVA = parseFloat(InitialBalances.bbva);
+            let saldoING = parseFloat(InitialBalances.ing);
+            let saldoPension = parseFloat(InitialBalances.pension);
+            
             const displayMes = document.getElementById('current-period-display');
 
-            // Suscribirse a Firebase
-            DbService.subscribeToBalances((movements) => {
-                // PARTIMOS SIEMPRE DE LOS SALDOS INICIALES
-                let saldoBBVA = parseFloat(InitialBalances.bbva);
-                let saldoING = parseFloat(InitialBalances.ing);
-                let saldoPension = parseFloat(InitialBalances.pension);
-
-                // Si hay movimientos, los procesamos
-                if (movements && movements.length > 0) {
-                    // Actualizar nombre del periodo con la última nómina
-                    const nominas = movements.filter(m => m.type === 'salary');
-                    if (nominas.length > 0) {
-                        displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
-                    } else {
-                        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                        displayMes.innerText = meses[new Date().getMonth()] + " " + new Date().getFullYear();
+            if (movements.length > 0) {
+                const nominas = movements.filter(m => m.type === 'salary');
+                if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
+                
+                movements.forEach(m => {
+                    const cant = parseFloat(m.amount);
+                    if (m.type === 'expense') {
+                        if (m.account === 'bbva') saldoBBVA -= cant; else saldoING -= cant;
+                    } else if (m.type === 'income' || m.type === 'salary') {
+                        if (m.account === 'bbva') saldoBBVA += cant; else saldoING += cant;
+                    } else if (m.type === 'transfer') {
+                        if (m.account === 'bbva') { saldoBBVA -= cant; saldoING += cant; }
+                        else { saldoING -= cant; saldoBBVA += cant; }
                     }
+                });
+            } else {
+                const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                displayMes.innerText = meses[new Date().getMonth()] + " " + new Date().getFullYear();
+            }
 
-                    // Aplicar sumas y restas
-                    movements.forEach(m => {
-                        const cant = parseFloat(m.amount);
-                        if (m.type === 'expense') {
-                            if (m.account === 'bbva') saldoBBVA -= cant;
-                            else saldoING -= cant;
-                        } 
-                        else if (m.type === 'income' || m.type === 'salary') {
-                            if (m.account === 'bbva') saldoBBVA += cant;
-                            else saldoING += cant;
-                        } 
-                        else if (m.type === 'transfer') {
-                            if (m.account === 'bbva') { saldoBBVA -= cant; saldoING += cant; }
-                            else { saldoING -= cant; saldoBBVA += cant; }
-                        }
-                    });
-                } else {
-                    // Si no hay movimientos, poner fecha actual por defecto
-                    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                    displayMes.innerText = meses[new Date().getMonth()] + " " + new Date().getFullYear();
-                }
-
-                // Pintar resultados finales
-                document.getElementById('saldo-bbva').innerText = f.format(saldoBBVA);
-                document.getElementById('saldo-ing').innerText = f.format(saldoING);
-                document.getElementById('saldo-pension').innerText = f.format(saldoPension);
-            });
+            document.getElementById('saldo-bbva').innerText = f.format(saldoBBVA);
+            document.getElementById('saldo-ing').innerText = f.format(saldoING);
+            document.getElementById('saldo-pension').innerText = f.format(saldoPension);
         };
 
+        // 3. INICIO DE LA APP
+        // Mostramos saldos iniciales YA
+        mostrarSaldosActuales();
+
+        // Luego escuchamos a Firebase para actualizar si hay cambios
         try {
             AuthGuard.verifyAccess();
-            actualizarDashboard();
-        } catch (e) {
-            console.error("Error al arrancar:", e);
+            DbService.subscribeToBalances((movements) => {
+                mostrarSaldosActuales(movements);
+            });
+        } catch (error) {
+            console.error("Error en arranque:", error);
         }
     </script>
 </body>
