@@ -1,6 +1,5 @@
 /**
- * ExpenseForm - Lógica del Formulario de Gastos
- * Maneja la visualización, carga dinámica de categorías y visibilidad del dashboard.
+ * ExpenseForm - Lógica con Transferencias Internas Bidireccionales
  */
 import { Categories } from '../config/categories.js';
 
@@ -8,15 +7,12 @@ export const ExpenseForm = {
     render() {
         const container = document.getElementById('dynamic-content');
         const dashboard = document.querySelector('.dashboard-grid');
-        
-        // 1. Ocultamos las tarjetas del dashboard
         dashboard.classList.add('hidden');
         
-        // 2. Pintamos el formulario con un botón de "Cancelar" para volver
         container.innerHTML = `
             <div class="form-container">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="margin:0;">✏️ Nuevo Gasto</h3>
+                    <h3 style="margin:0;">✏️ Nuevo Movimiento</h3>
                     <button id="btn-close-form" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
                 </div>
                 
@@ -26,34 +22,46 @@ export const ExpenseForm = {
                 </div>
 
                 <div class="form-group">
-                    <label>Cuenta de origen</label>
+                    <label>¿De dónde sale el dinero? (Origen)</label>
                     <select id="exp-account">
                         <option value="bbva">BBVA Principal</option>
                         <option value="ing">Ahorro ING</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label>Categoría</label>
-                    <select id="exp-category">
-                        <option value="">Selecciona categoría...</option>
-                        ${Categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
-                    </select>
+                <div class="form-group" id="transfer-logic" style="background: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #d0e3ff;">
+                    <label style="display: flex; align-items: center; cursor: pointer; font-weight: bold; color: #004481;">
+                        <input type="checkbox" id="is-transfer" style="width: auto; margin-right: 10px;"> 
+                        ¿Es un traspaso entre mis cuentas?
+                    </label>
+                    <small id="transfer-help" style="color: #666; display: block; margin-top: 5px;">
+                        (Si marcas esto, el dinero se moverá entre BBVA e ING)
+                    </small>
+                </div>
+
+                <div id="category-fields">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="exp-category">
+                            <option value="">Selecciona categoría...</option>
+                            ${Categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subcategoría</label>
+                        <select id="exp-subcategory" disabled>
+                            <option value="">Primero elige categoría</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Subcategoría</label>
-                    <select id="exp-subcategory" disabled>
-                        <option value="">Primero elige categoría</option>
-                    </select>
+                    <label>Nota adicional</label>
+                    <input type="text" id="exp-note" placeholder="Ej: Traspaso para recibos">
                 </div>
 
-                <div class="form-group">
-                    <label>Nota adicional (Opcional)</label>
-                    <input type="text" id="exp-note" placeholder="Ej: Compra semanal">
-                </div>
-
-                <button class="btn-save" id="btn-save-expense">Guardar Gasto</button>
+                <button class="btn-save" id="btn-save-expense">Guardar Movimiento</button>
                 <p id="cancel-link" style="text-align:center; margin-top:15px; color:#e74c3c; cursor:pointer; font-weight:600;">Cancelar y volver</p>
             </div>
         `;
@@ -64,42 +72,61 @@ export const ExpenseForm = {
     setupLogic() {
         const categorySelect = document.getElementById('exp-category');
         const subcategorySelect = document.getElementById('exp-subcategory');
+        const isTransferCheck = document.getElementById('is-transfer');
+        const categoryFields = document.getElementById('category-fields');
+        const accountSelect = document.getElementById('exp-account');
+        const transferHelp = document.getElementById('transfer-help');
         const btnSave = document.getElementById('btn-save-expense');
-        const btnClose = document.getElementById('btn-close-form');
-        const cancelLink = document.getElementById('cancel-link');
 
-        // Función para cerrar formulario y mostrar dashboard
-        const cerrarFormulario = () => {
-            document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>';
+        const cerrar = () => {
+            document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción para empezar.</p>';
             document.querySelector('.dashboard-grid').classList.remove('hidden');
         };
 
-        btnClose.addEventListener('click', cerrarFormulario);
-        cancelLink.addEventListener('click', cerrarFormulario);
+        // Cambiar el texto de ayuda según la cuenta elegida
+        const updateHelpText = () => {
+            const origen = accountSelect.value;
+            const destino = origen === 'bbva' ? 'ING' : 'BBVA';
+            transferHelp.innerHTML = isTransferCheck.checked 
+                ? `<strong>Movimiento:</strong> Restar de ${origen.toUpperCase()} ➔ Sumar en ${destino}`
+                : `(Si marcas esto, el dinero se moverá entre BBVA e ING)`;
+        };
+
+        isTransferCheck.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                categoryFields.style.display = "none";
+                updateHelpText();
+            } else {
+                categoryFields.style.display = "block";
+                transferHelp.innerText = "(Si marcas esto, el dinero se moverá entre BBVA e ING)";
+            }
+        });
+
+        accountSelect.addEventListener('change', updateHelpText);
 
         categorySelect.addEventListener('change', (e) => {
             const selectedCat = Categories.find(cat => cat.id === e.target.value);
             if (selectedCat) {
-                subcategorySelect.innerHTML = selectedCat.subcategories
-                    .map(sub => `<option value="${sub.toLowerCase()}">${sub}</option>`)
-                    .join('');
+                subcategorySelect.innerHTML = selectedCat.subcategories.map(sub => `<option value="${sub.toLowerCase()}">${sub}</option>`).join('');
                 subcategorySelect.disabled = false;
-            } else {
-                subcategorySelect.innerHTML = '<option value="">Primero elige categoría</option>';
-                subcategorySelect.disabled = true;
             }
         });
 
         btnSave.addEventListener('click', () => {
             const amount = document.getElementById('exp-amount').value;
-            if (!amount || categorySelect.value === "") {
-                alert("Por favor, rellena importe y categoría.");
-                return;
+            if (!amount) return alert("Introduce el importe");
+
+            if (isTransferCheck.checked) {
+                const origen = accountSelect.value;
+                const destino = origen === 'bbva' ? 'ING' : 'BBVA';
+                alert(`TRASPASO CONFIRMADO: ${amount}€ de ${origen.toUpperCase()} a ${destino}.`);
+            } else {
+                alert(`GASTO CONFIRMADO: ${amount}€ en ${categorySelect.value}.`);
             }
-            
-            // Aquí irá la conexión a Firebase en el siguiente paso
-            alert("¡Listo! En el siguiente paso este botón restará dinero de tu saldo.");
-            cerrarFormulario();
+            cerrar();
         });
+
+        document.getElementById('btn-close-form').addEventListener('click', cerrar);
+        document.getElementById('cancel-link').addEventListener('click', cerrar);
     }
 };

@@ -10,7 +10,6 @@
 <body>
 
     <div id="app-container">
-        
         <section id="login-section">
             <h1 style="font-size: 2rem; margin-bottom: 10px;">Finanzas Familiares</h1>
             <p style="color: #65676b;">Acceso seguro mediante lista blanca</p>
@@ -56,18 +55,9 @@
 
             <main class="main-content">
                 <div class="dashboard-grid">
-                    <div class="card bbva">
-                        <span class="bank-label">BBVA Principal</span>
-                        <span class="balance" id="saldo-bbva">0,00 €</span>
-                    </div>
-                    <div class="card ing">
-                        <span class="bank-label">Ahorro ING</span>
-                        <span class="balance" id="saldo-ing">0,00 €</span>
-                    </div>
-                    <div class="card pension">
-                        <span class="bank-label">Plan Pensiones</span>
-                        <span class="balance" id="saldo-pension">0,00 €</span>
-                    </div>
+                    <div class="card bbva"><span class="bank-label">BBVA Principal</span><span class="balance" id="saldo-bbva">0,00 €</span></div>
+                    <div class="card ing"><span class="bank-label">Ahorro ING</span><span class="balance" id="saldo-ing">0,00 €</span></div>
+                    <div class="card pension"><span class="bank-label">Plan Pensiones</span><span class="balance" id="saldo-pension">0,00 €</span></div>
                 </div>
                 <div id="dynamic-content">
                     <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>
@@ -81,8 +71,8 @@
                     </div>
                     <nav>
                         <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
-                        <div class="nav-item">💰 Añadir Ingreso</div>
-                        <div class="nav-item">🏦 Registrar Nómina</div>
+                        <div class="nav-item" id="mob-add-income">💰 Añadir Ingreso</div>
+                        <div class="nav-item" id="mob-add-salary">🏦 Registrar Nómina</div>
                         <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
                     </nav>
                 </div>
@@ -95,6 +85,7 @@
         import { AuthGuard } from './js/middleware/authGuard.js';
         import { InitialBalances } from './js/config/initialBalances.js';
         import { ExpenseForm } from './js/components/expenseForm.js';
+        import { IncomeForm } from './js/components/incomeForm.js';
 
         const cargarDashboard = () => {
             const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -109,11 +100,25 @@
         AuthGuard.verifyAccess();
         cargarDashboard();
 
-        // Botón de Gasto (PC y Móvil)
+        // EVENTOS GASTO
         document.getElementById('pc-add-expense').addEventListener('click', () => ExpenseForm.render());
         document.getElementById('mob-add-expense').addEventListener('click', () => {
             ExpenseForm.render();
-            document.getElementById('side-menu').classList.add('hidden'); // Cerrar menú al abrir form
+            document.getElementById('side-menu').classList.add('hidden');
+        });
+
+        // EVENTOS INGRESO
+        document.getElementById('pc-add-income').addEventListener('click', () => IncomeForm.render(false));
+        document.getElementById('mob-add-income').addEventListener('click', () => {
+            IncomeForm.render(false);
+            document.getElementById('side-menu').classList.add('hidden');
+        });
+
+        // EVENTOS NÓMINA
+        document.getElementById('pc-add-salary').addEventListener('click', () => IncomeForm.render(true));
+        document.getElementById('mob-add-salary').addEventListener('click', () => {
+            IncomeForm.render(true);
+            document.getElementById('side-menu').classList.add('hidden');
         });
 
         document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
