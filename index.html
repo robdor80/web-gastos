@@ -22,22 +22,13 @@
         <section id="pin-section" class="hidden">
             <div style="text-align: center; padding-top: 50px;">
                 <h2>PIN de Seguridad</h2>
-                <div class="pin-dots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
+                <div class="pin-dots" style="display:flex; justify-content:center; gap:15px; margin:30px 0;">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
                 </div>
                 <div class="pin-grid">
-                    <button class="pin-btn">1</button>
-                    <button class="pin-btn">2</button>
-                    <button class="pin-btn">3</button>
-                    <button class="pin-btn">4</button>
-                    <button class="pin-btn">5</button>
-                    <button class="pin-btn">6</button>
-                    <button class="pin-btn">7</button>
-                    <button class="pin-btn">8</button>
-                    <button class="pin-btn">9</button>
+                    <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
+                    <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
+                    <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
                     <button class="pin-btn" style="border:none; background:none;"></button>
                     <button class="pin-btn">0</button>
                     <button class="pin-btn del-btn">⌫</button>
@@ -48,13 +39,9 @@
         <section id="app-section" class="hidden">
             <header class="app-header">
                 <div class="menu-burguer-container" id="menu-open">
-                    <div class="menu-burguer">
-                        <span></span><span></span><span></span>
-                    </div>
+                    <div class="menu-burguer"><span></span><span></span><span></span></div>
                 </div>
-                <div class="logo-period">
-                    <span id="current-period-display">Enero 2026</span>
-                </div>
+                <div class="logo-period"><span id="current-period-display">Cargando...</span></div>
                 <div id="user-display"></div>
             </header>
 
@@ -71,27 +58,24 @@
                 <div class="dashboard-grid">
                     <div class="card bbva">
                         <span class="bank-label">BBVA Principal</span>
-                        <span class="balance" id="saldo-bbva">1.250,00 €</span>
+                        <span class="balance" id="saldo-bbva">0,00 €</span>
                     </div>
                     <div class="card ing">
                         <span class="bank-label">Ahorro ING</span>
-                        <span class="balance" id="saldo-ing">12.400,00 €</span>
+                        <span class="balance" id="saldo-ing">0,00 €</span>
                     </div>
                     <div class="card pension">
-                        <span class="bank-label">Plan Pensiones BBVA</span>
-                        <span class="balance" id="saldo-pension">5.100,00 €</span>
+                        <span class="bank-label">Plan Pensiones</span>
+                        <span class="balance" id="saldo-pension">0,00 €</span>
                     </div>
                 </div>
-                <div id="dynamic-content" style="margin-top: 30px; text-align: center; color: #65676b;">
-                    <p>Selecciona una operación para comenzar</p>
-                </div>
+                <div id="dynamic-content"></div>
             </main>
 
             <aside id="side-menu" class="side-menu-overlay hidden">
                 <div class="side-menu-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                        <h3>Menú</h3>
-                        <button id="menu-close" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">✕</button>
+                        <h3>Menú</h3><button id="menu-close" style="background:none; border:none; font-size:1.8rem;">✕</button>
                     </div>
                     <nav>
                         <div class="nav-item">✏️ Añadir Gasto</div>
@@ -108,15 +92,20 @@
         import { AuthService } from './js/firebase/auth.js';
         import { AuthGuard } from './js/middleware/authGuard.js';
 
-        // 1. Iniciamos el protector (Google Auth + PIN)
-        AuthGuard.verifyAccess();
+        // Función para poner la fecha actual
+        const actualizarFecha = () => {
+            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            const d = new Date();
+            document.getElementById('current-period-display').innerText = `${meses[d.getMonth()]} ${d.getFullYear()}`;
+        };
 
-        // 2. Escuchamos botones de inicio y cierre de sesión
+        AuthGuard.verifyAccess();
+        actualizarFecha();
+
         document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
         document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
         document.getElementById('mob-logout').addEventListener('click', () => AuthService.logout());
 
-        // 3. Control del Menú Burguer (Móvil)
         const menuOpen = document.getElementById('menu-open');
         const menuClose = document.getElementById('menu-close');
         const sideMenu = document.getElementById('side-menu');
