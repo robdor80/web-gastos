@@ -1,140 +1,92 @@
 :root {
-    --primary: #2c3e50;
+    --primary-color: #2c3e50;
     --bbva-blue: #004481;
     --ing-orange: #ff6200;
     --pension-green: #27ae60;
-    --text-light: #666;
+    --text-muted: #65676b;
 }
 
-/* HEADER */
+/* HEADER Y NAV PC */
 .app-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 15px 20px;
+    padding: 0 20px;
+    height: 70px;
     background: #fff;
-    border-bottom: 1px solid #eee;
-    height: 60px;
+    border-bottom: 1px solid #e5e5e5;
 }
 
-.logo-period {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: var(--primary);
-}
+.logo-period { font-weight: 800; font-size: 1.3rem; color: var(--primary-color); }
+
+.pc-nav-bar { display: none; background: #fff; border-bottom: 1px solid #e5e5e5; }
+.pc-nav-bar ul { display: flex; justify-content: center; list-style: none; gap: 40px; padding: 15px 0; }
+.pc-nav-bar li { font-weight: 600; cursor: pointer; color: var(--primary-color); }
 
 /* DASHBOARD */
-.main-content {
-    padding: 20px;
-}
+.main-content { padding: 20px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.card { background: #fff; padding: 25px; border-radius: 16px; border: 1px solid #e5e5e5; position: relative; }
+.card.bbva::before { content:""; position:absolute; left:0; top:20px; bottom:20px; width:5px; background: var(--bbva-blue); }
+.card.ing::before { content:""; position:absolute; left:0; top:20px; bottom:20px; width:5px; background: var(--ing-orange); }
+.card.pension::before { content:""; position:absolute; left:0; top:20px; bottom:20px; width:5px; background: var(--pension-green); }
+.bank-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+.balance { font-size: 2rem; font-weight: 800; margin-top: 8px; }
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-top: 10px;
-}
-
-.card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* --- SECCIÓN PIN (DISEÑO) --- */
+#pin-section {
     display: flex;
     flex-direction: column;
-    position: relative;
-    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    height: 80vh; /* Para que no pegue al fondo */
 }
 
-.card::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 6px;
+.pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
 }
 
-.card.bbva::before { background: var(--bbva-blue); }
-.card.ing::before { background: var(--ing-orange); }
-.card.pension::before { background: var(--pension-green); }
-
-.bank-label {
-    font-size: 0.8rem;
-    color: var(--text-light);
-    text-transform: uppercase;
-    font-weight: 700;
+.dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
 }
 
-.balance {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-top: 10px;
+.dot.active {
+    background: var(--primary-color);
 }
 
-/* NAVEGACIÓN MÓVIL */
-.pc-nav-bar { display: none; }
+.pin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
 
-.menu-burguer-container {
+.pin-btn {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 1.6rem;
+    font-weight: 600;
     cursor: pointer;
-    padding: 5px;
+    transition: background 0.2s;
 }
 
-.menu-burguer span {
-    display: block;
-    width: 25px;
-    height: 3px;
-    background: var(--primary);
-    margin: 5px 0;
-    border-radius: 3px;
-}
+.pin-btn:active { background: #f0f2f5; }
+.del-btn { border: none; color: #e74c3c; font-size: 1.8rem; }
 
-.side-menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 9999;
-    backdrop-filter: blur(4px);
-}
+/* MENÚ MÓVIL */
+.menu-burguer span { display: block; width: 22px; height: 2px; background: var(--primary-color); margin: 5px 0; }
+.side-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; }
+.side-menu-content { width: 280px; height: 100%; background: #fff; padding: 30px 20px; }
 
-.side-menu-content {
-    width: 300px;
-    height: 100%;
-    background: white;
-    padding: 30px 20px;
-}
-
-.nav-item {
-    padding: 18px 10px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 1.1rem;
-    cursor: pointer;
-}
-
-/* RESPONSIVE PC (1024px) */
 @media screen and (min-width: 1024px) {
     .menu-burguer-container, .side-menu-overlay { display: none; }
-
-    .pc-nav-bar {
-        display: block;
-        background: #fff;
-        border-bottom: 1px solid #eee;
-    }
-
-    .pc-nav-bar ul {
-        display: flex;
-        justify-content: center;
-        list-style: none;
-        gap: 50px;
-        padding: 15px 0;
-    }
-
-    .pc-nav-bar li {
-        font-weight: 600;
-        cursor: pointer;
-        color: var(--primary);
-    }
+    .pc-nav-bar { display: block; }
 }

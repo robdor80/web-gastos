@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control de Gastos - Nivel 3</title>
+    <title>Web Gastos - Nivel 3</title>
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
 </head>
@@ -12,27 +12,50 @@
     <div id="app-container">
         
         <section id="login-section">
-            <h1>Finanzas Familiares</h1>
-            <p>Acceso restringido. Identifícate para continuar.</p>
-            <button id="btn-login">Entrar con Google</button>
+            <h1 style="font-size: 2rem; margin-bottom: 10px;">Finanzas Familiares</h1>
+            <p style="color: #65676b;">Acceso seguro mediante lista blanca</p>
+            <button id="btn-login" style="padding: 15px 30px; background:#4285F4; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">
+                Entrar con Google
+            </button>
+        </section>
+
+        <section id="pin-section" class="hidden">
+            <div style="text-align: center; padding-top: 50px;">
+                <h2>PIN de Seguridad</h2>
+                <div class="pin-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <div class="pin-grid">
+                    <button class="pin-btn">1</button>
+                    <button class="pin-btn">2</button>
+                    <button class="pin-btn">3</button>
+                    <button class="pin-btn">4</button>
+                    <button class="pin-btn">5</button>
+                    <button class="pin-btn">6</button>
+                    <button class="pin-btn">7</button>
+                    <button class="pin-btn">8</button>
+                    <button class="pin-btn">9</button>
+                    <button class="pin-btn" style="border:none; background:none;"></button>
+                    <button class="pin-btn">0</button>
+                    <button class="pin-btn del-btn">⌫</button>
+                </div>
+            </div>
         </section>
 
         <section id="app-section" class="hidden">
-            
             <header class="app-header">
                 <div class="menu-burguer-container" id="menu-open">
                     <div class="menu-burguer">
                         <span></span><span></span><span></span>
                     </div>
                 </div>
-                
                 <div class="logo-period">
                     <span id="current-period-display">Enero 2026</span>
                 </div>
-
-                <div class="user-info">
-                    <span id="user-display"></span>
-                </div>
+                <div id="user-display"></div>
             </header>
 
             <nav class="pc-nav-bar">
@@ -55,25 +78,25 @@
                         <span class="balance" id="saldo-ing">12.400,00 €</span>
                     </div>
                     <div class="card pension">
-                        <span class="bank-label">Plan Pensiones</span>
+                        <span class="bank-label">Plan Pensiones BBVA</span>
                         <span class="balance" id="saldo-pension">5.100,00 €</span>
                     </div>
                 </div>
-                
-                <div id="dynamic-content">
-                    </div>
+                <div id="dynamic-content" style="margin-top: 30px; text-align: center; color: #65676b;">
+                    <p>Selecciona una operación para comenzar</p>
+                </div>
             </main>
 
             <aside id="side-menu" class="side-menu-overlay hidden">
                 <div class="side-menu-content">
-                    <div class="menu-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                         <h3>Menú</h3>
-                        <button id="menu-close" style="background:none; border:none; font-size:1.5rem;">✕</button>
+                        <button id="menu-close" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">✕</button>
                     </div>
-                    <nav class="mobile-nav">
-                        <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
-                        <div class="nav-item" id="mob-add-income">💰 Añadir Ingreso</div>
-                        <div class="nav-item" id="mob-add-salary">🏦 Registrar Nómina</div>
+                    <nav>
+                        <div class="nav-item">✏️ Añadir Gasto</div>
+                        <div class="nav-item">💰 Añadir Ingreso</div>
+                        <div class="nav-item">🏦 Registrar Nómina</div>
                         <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
                     </nav>
                 </div>
@@ -85,15 +108,15 @@
         import { AuthService } from './js/firebase/auth.js';
         import { AuthGuard } from './js/middleware/authGuard.js';
 
-        // Iniciar protección
+        // 1. Iniciamos el protector (Google Auth + PIN)
         AuthGuard.verifyAccess();
 
-        // Login / Logout
+        // 2. Escuchamos botones de inicio y cierre de sesión
         document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
         document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
         document.getElementById('mob-logout').addEventListener('click', () => AuthService.logout());
 
-        // Control Menú Burguer
+        // 3. Control del Menú Burguer (Móvil)
         const menuOpen = document.getElementById('menu-open');
         const menuClose = document.getElementById('menu-close');
         const sideMenu = document.getElementById('side-menu');
