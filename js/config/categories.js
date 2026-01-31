@@ -7,7 +7,7 @@ export const Categories = [
     {
         id: "vivienda",
         name: "Vivienda",
-        subcategories: ["Hipoteca", "Comunidad", "Garajes comunidad", "Derramas", "Luz", "Agua", "Gas", "Seguro hogar"]
+        subcategories: ["Hipoteca", "Comunidad", "Garajes comunidad", "Derramas", "Luz", "Agua", "Gas", "Seguro hogar", "Bote"]
     },
     {
         id: "alimentacion",
@@ -18,6 +18,11 @@ export const Categories = [
         id: "amazon",
         name: "Amazon",
         subcategories: ["General"] // Subcategoría genérica por defecto
+    },
+    {
+        id: "ropa",
+        name: "Ropa",
+        subcategories: ["Pull & Bear", "Bershka", "Stradivarius", "Outlet", "New Yorker",]
     },
     {
         id: "zalando",
