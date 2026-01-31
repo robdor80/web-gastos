@@ -91,16 +91,24 @@
     <script type="module">
         import { AuthService } from './js/firebase/auth.js';
         import { AuthGuard } from './js/middleware/authGuard.js';
+        import { InitialBalances } from './js/config/initialBalances.js';
 
-        // Función para poner la fecha actual
-        const actualizarFecha = () => {
+        // 1. Mostrar fecha y saldos iniciales
+        const cargarDashboard = () => {
             const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const d = new Date();
             document.getElementById('current-period-display').innerText = `${meses[d.getMonth()]} ${d.getFullYear()}`;
+            
+            // Formatear números a moneda Euro
+            const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+            
+            document.getElementById('saldo-bbva').innerText = f.format(InitialBalances.bbva);
+            document.getElementById('saldo-ing').innerText = f.format(InitialBalances.ing);
+            document.getElementById('saldo-pension').innerText = f.format(InitialBalances.pension);
         };
 
         AuthGuard.verifyAccess();
-        actualizarFecha();
+        cargarDashboard();
 
         document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
         document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
