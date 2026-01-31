@@ -1,6 +1,3 @@
-/**
- * IncomeForm - Con selector de fecha manual
- */
 import { DbService } from '../firebase/db.js';
 
 export const IncomeForm = {
@@ -9,7 +6,6 @@ export const IncomeForm = {
         const dashboard = document.querySelector('.dashboard-grid');
         dashboard.classList.add('hidden');
         
-        // Obtenemos la fecha de hoy en formato YYYY-MM-DD para el input
         const hoy = new Date().toISOString().split('T')[0];
         
         container.innerHTML = `
@@ -54,6 +50,7 @@ export const IncomeForm = {
 
     setupLogic(isSalary) {
         const btnSave = document.getElementById('btn-save-income');
+        
         const cerrar = () => {
             document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción para empezar.</p>';
             document.querySelector('.dashboard-grid').classList.remove('hidden');
@@ -63,7 +60,7 @@ export const IncomeForm = {
             const amount = document.getElementById('inc-amount').value;
             const dateValue = document.getElementById('inc-date').value;
 
-            if (!amount || !dateValue) return alert("Faltan datos");
+            if (!amount) return alert("Introduce el importe");
 
             const movementData = {
                 type: isSalary ? 'salary' : 'income',
@@ -71,13 +68,26 @@ export const IncomeForm = {
                 account: document.getElementById('inc-account').value,
                 category: isSalary ? 'Nómina' : 'Ingreso Extra',
                 note: document.getElementById('inc-note').value || (isSalary ? 'Nómina' : 'Ingreso'),
-                dateCustom: dateValue, // Guardamos la fecha que tú elijas
+                dateCustom: dateValue,
                 user: "Roberto"
             };
 
             btnSave.innerText = "Guardando...";
-            const ok = await DbService.saveMovement(movementData);
-            if (ok) { alert("✅ Guardado con fecha: " + dateValue); cerrar(); }
+            btnSave.disabled = true;
+
+            try {
+                const ok = await DbService.saveMovement(movementData);
+                if (ok) {
+                    alert("✅ Guardado correctamente");
+                    cerrar();
+                } else {
+                    throw new Error("Error en DbService");
+                }
+            } catch (err) {
+                alert("❌ Error al guardar");
+                btnSave.innerText = "Reintentar";
+                btnSave.disabled = false;
+            }
         });
 
         document.getElementById('btn-close-inc').onclick = cerrar;

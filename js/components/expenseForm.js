@@ -1,6 +1,3 @@
-/**
- * ExpenseForm - Con selector de fecha manual
- */
 import { Categories } from '../config/categories.js';
 import { DbService } from '../firebase/db.js';
 
@@ -40,11 +37,11 @@ export const ExpenseForm = {
                 <div class="form-group" style="background: #f0f7ff; padding: 10px; border-radius: 8px;">
                     <label style="display: flex; align-items: center; cursor: pointer;">
                         <input type="checkbox" id="is-transfer" style="width: auto; margin-right: 10px;"> 
-                        ¿Es un traspaso entre mis cuentas?
+                        ¿Es un traspaso entre cuentas?
                     </label>
                 </div>
 
-                <div id="category-fields">
+                <div id="category-section">
                     <div class="form-group">
                         <label>Categoría</label>
                         <select id="exp-category">
@@ -59,7 +56,7 @@ export const ExpenseForm = {
                     <input type="text" id="exp-note" placeholder="Opcional">
                 </div>
 
-                <button class="btn-save" id="btn-save-expense">Guardar</button>
+                <button class="btn-save" id="btn-save-expense">Guardar Movimiento</button>
                 <p id="cancel-link" style="text-align:center; margin-top:15px; color:#e74c3c; cursor:pointer; font-weight:600;">Cancelar</p>
             </div>
         `;
@@ -69,29 +66,52 @@ export const ExpenseForm = {
 
     setupLogic() {
         const btnSave = document.getElementById('btn-save-expense');
+        const isTransferCheck = document.getElementById('is-transfer');
+        const categorySection = document.getElementById('category-section');
+
         const cerrar = () => {
             document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción para empezar.</p>';
             document.querySelector('.dashboard-grid').classList.remove('hidden');
         };
 
+        isTransferCheck.addEventListener('change', (e) => {
+            categorySection.style.display = e.target.checked ? 'none' : 'block';
+        });
+
         btnSave.addEventListener('click', async () => {
             const amount = document.getElementById('exp-amount').value;
-            const dateValue = document.getElementById('exp-date').value;
-            if (!amount || !dateValue) return alert("Faltan datos");
+            if (!amount) return alert("Introduce el importe");
+
+            const isTransfer = isTransferCheck.checked;
+            const account = document.getElementById('exp-account').value;
 
             const movementData = {
-                type: document.getElementById('is-transfer').checked ? 'transfer' : 'expense',
+                type: isTransfer ? 'transfer' : 'expense',
                 amount: amount,
-                account: document.getElementById('exp-account').value,
-                category: document.getElementById('exp-category').value || 'Traspaso',
+                account: account,
+                category: isTransfer ? 'Traspaso' : document.getElementById('exp-category').value,
+                subcategory: isTransfer ? (account === 'bbva' ? 'A ING' : 'A BBVA') : '',
                 note: document.getElementById('exp-note').value,
-                dateCustom: dateValue,
+                dateCustom: document.getElementById('exp-date').value,
                 user: "Roberto"
             };
 
             btnSave.innerText = "Guardando...";
-            const ok = await DbService.saveMovement(movementData);
-            if (ok) { alert("✅ Registrado el " + dateValue); cerrar(); }
+            btnSave.disabled = true;
+
+            try {
+                const ok = await DbService.saveMovement(movementData);
+                if (ok) {
+                    alert("✅ Registrado con éxito");
+                    cerrar();
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                alert("❌ Error al guardar");
+                btnSave.innerText = "Guardar Movimiento";
+                btnSave.disabled = false;
+            }
         });
 
         document.getElementById('btn-close-form').onclick = cerrar;
