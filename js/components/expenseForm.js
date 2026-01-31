@@ -1,7 +1,8 @@
 /**
- * ExpenseForm - Lógica con Transferencias Internas Bidireccionales
+ * ExpenseForm - Lógica con Transferencias Internas y Conexión a Firebase
  */
 import { Categories } from '../config/categories.js';
+import { DbService } from '../firebase/db.js';
 
 export const ExpenseForm = {
     render() {
@@ -58,7 +59,7 @@ export const ExpenseForm = {
 
                 <div class="form-group">
                     <label>Nota adicional</label>
-                    <input type="text" id="exp-note" placeholder="Ej: Traspaso para recibos">
+                    <input type="text" id="exp-note" placeholder="Ej: Compra o ahorro">
                 </div>
 
                 <button class="btn-save" id="btn-save-expense">Guardar Movimiento</button>
@@ -83,7 +84,6 @@ export const ExpenseForm = {
             document.querySelector('.dashboard-grid').classList.remove('hidden');
         };
 
-        // Cambiar el texto de ayuda según la cuenta elegida
         const updateHelpText = () => {
             const origen = accountSelect.value;
             const destino = origen === 'bbva' ? 'ING' : 'BBVA';
@@ -112,18 +112,38 @@ export const ExpenseForm = {
             }
         });
 
-        btnSave.addEventListener('click', () => {
+        btnSave.addEventListener('click', async () => {
             const amount = document.getElementById('exp-amount').value;
-            if (!amount) return alert("Introduce el importe");
+            const account = accountSelect.value;
+            const isTransfer = isTransferCheck.checked;
 
-            if (isTransferCheck.checked) {
-                const origen = accountSelect.value;
-                const destino = origen === 'bbva' ? 'ING' : 'BBVA';
-                alert(`TRASPASO CONFIRMADO: ${amount}€ de ${origen.toUpperCase()} a ${destino}.`);
+            if (!amount) return alert("Por favor, introduce el importe.");
+            if (!isTransfer && categorySelect.value === "") return alert("Elige una categoría.");
+
+            // Estructura de datos para Firebase
+            const movementData = {
+                type: isTransfer ? 'transfer' : 'expense',
+                amount: amount,
+                account: account,
+                category: isTransfer ? 'Traspaso Interno' : categorySelect.value,
+                subcategory: isTransfer ? (account === 'bbva' ? 'A ING' : 'A BBVA') : subcategorySelect.value,
+                note: document.getElementById('exp-note').value,
+                user: "Roberto" // Luego lo haremos dinámico con el login
+            };
+
+            btnSave.innerText = "Guardando...";
+            btnSave.disabled = true;
+
+            const ok = await DbService.saveMovement(movementData);
+
+            if (ok) {
+                alert("✅ Movimiento guardado en la nube.");
+                cerrar();
             } else {
-                alert(`GASTO CONFIRMADO: ${amount}€ en ${categorySelect.value}.`);
+                alert("❌ Error al guardar. ¿Has configurado las reglas de Firestore?");
+                btnSave.innerText = "Guardar Movimiento";
+                btnSave.disabled = false;
             }
-            cerrar();
         });
 
         document.getElementById('btn-close-form').addEventListener('click', cerrar);
