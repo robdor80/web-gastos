@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
-        /* Estilos específicos para las tarjetas con logos */
+        /* Estilos específicos para las tarjetas con logos y colores suaves */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -20,34 +20,46 @@
             height: 140px;
             border-radius: 18px;
             padding: 20px;
-            color: white;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             overflow: hidden;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             transition: transform 0.2s;
+            border: 1px solid rgba(0,0,0,0.05); /* Borde sutil */
         }
 
         .card:active { transform: scale(0.98); }
 
-        /* Posicionamiento de los logos */
+        /* Logos en la esquina */
         .bank-logo {
             position: absolute;
             top: 15px;
             right: 15px;
-            height: 30px;
+            height: 28px;
             width: auto;
-            border-radius: 4px;
+            opacity: 0.9;
         }
 
-        /* Fondos corporativos con degradado */
-        .card.bbva { background: linear-gradient(135deg, #004481 0%, #043263 100%); border: none; }
-        .card.ing { background: linear-gradient(135deg, #FF6200 0%, #d35400 100%); border: none; }
-        .card.pension { background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); border: none; }
+        /* FONDOS SUAVES (Pastel) */
+        .card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
+        .card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
+        .card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
 
-        .bank-label { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
-        .balance { font-size: 2.1rem; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .bank-label { 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            opacity: 0.8;
+        }
+        
+        .balance { 
+            font-size: 2.2rem; 
+            font-weight: 800; 
+            margin-top: 5px;
+            color: #2c3e50; /* Texto oscuro para máxima legibilidad */
+        }
     </style>
 </head>
 <body>
@@ -73,7 +85,7 @@
         <section id="pin-section" class="hidden">
             <div style="text-align: center; padding-top: 50px;">
                 <h2>PIN de Seguridad</h2>
-                <div class="pin-dots">
+                <div class="pin-dots" style="display:flex; justify-content:center; gap:15px; margin:30px 0;">
                     <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
                 </div>
                 <div class="pin-grid">
@@ -176,7 +188,7 @@
 
             if (movements.length > 0) {
                 const nominas = movements.filter(m => m.type === 'salary');
-                if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Febrero";
+                if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
 
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
@@ -193,7 +205,7 @@
                     }
                 });
             } else {
-                displayMes.innerText = "Enero 2026";
+                displayMes.innerText = "Febrero 2026";
             }
 
             document.getElementById('saldo-bbva').innerText = f.format(sBBVA);
