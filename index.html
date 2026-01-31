@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,15 +7,13 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
 </head>
-
 <body>
 
     <div id="app-container">
         <section id="login-section">
             <h1 style="font-size: 2rem; margin-bottom: 10px;">Finanzas Familiares</h1>
             <p style="color: #65676b;">Acceso seguro mediante lista blanca</p>
-            <button id="btn-login"
-                style="padding: 15px 30px; background:#4285F4; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">
+            <button id="btn-login" style="padding: 15px 30px; background:#4285F4; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">
                 Entrar con Google
             </button>
         </section>
@@ -25,18 +22,12 @@
             <div style="text-align: center; padding-top: 50px;">
                 <h2>PIN de Seguridad</h2>
                 <div class="pin-dots" style="display:flex; justify-content:center; gap:15px; margin:30px 0;">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
                 </div>
                 <div class="pin-grid">
-                    <button class="pin-btn">1</button><button class="pin-btn">2</button><button
-                        class="pin-btn">3</button>
-                    <button class="pin-btn">4</button><button class="pin-btn">5</button><button
-                        class="pin-btn">6</button>
-                    <button class="pin-btn">7</button><button class="pin-btn">8</button><button
-                        class="pin-btn">9</button>
+                    <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
+                    <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
+                    <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
                     <button class="pin-btn" style="border:none; background:none;"></button>
                     <button class="pin-btn">0</button>
                     <button class="pin-btn del-btn">⌫</button>
@@ -64,31 +55,34 @@
 
             <main class="main-content">
                 <div class="dashboard-grid">
-                    <div class="card bbva"><span class="bank-label">BBVA Principal</span><span class="balance"
-                            id="saldo-bbva">0,00 €</span></div>
-                    <div class="card ing"><span class="bank-label">Ahorro ING</span><span class="balance"
-                            id="saldo-ing">0,00 €</span></div>
-                    <div class="card pension"><span class="bank-label">Plan Pensiones</span><span class="balance"
-                            id="saldo-pension">0,00 €</span></div>
+                    <div class="card bbva">
+                        <span class="bank-label">BBVA Principal</span>
+                        <span class="balance" id="saldo-bbva">0,00 €</span>
+                    </div>
+                    <div class="card ing">
+                        <span class="bank-label">Ahorro ING</span>
+                        <span class="balance" id="saldo-ing">0,00 €</span>
+                    </div>
+                    <div class="card pension">
+                        <span class="bank-label">Plan Pensiones</span>
+                        <span class="balance" id="saldo-pension">0,00 €</span>
+                    </div>
                 </div>
                 <div id="dynamic-content">
-                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para
-                        empezar.</p>
+                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>
                 </div>
             </main>
 
             <aside id="side-menu" class="side-menu-overlay hidden">
                 <div class="side-menu-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                        <h3>Menú</h3><button id="menu-close"
-                            style="background:none; border:none; font-size:1.8rem;">✕</button>
+                        <h3>Menú</h3><button id="menu-close" style="background:none; border:none; font-size:1.8rem;">✕</button>
                     </div>
                     <nav>
                         <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
                         <div class="nav-item" id="mob-add-income">💰 Añadir Ingreso</div>
                         <div class="nav-item" id="mob-add-salary">🏦 Registrar Nómina</div>
-                        <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión
-                        </div>
+                        <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
                     </nav>
                 </div>
             </aside>
@@ -103,8 +97,36 @@
         import { IncomeForm } from './js/components/incomeForm.js';
         import { DbService } from './js/firebase/db.js';
 
-        AuthGuard.verifyAccess();
+        // 1. ASIGNACIÓN DE EVENTOS (Lo primero para que los botones respondan)
+        document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
+        document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
+        document.getElementById('mob-logout').addEventListener('click', () => AuthService.logout());
 
+        document.getElementById('pc-add-expense').addEventListener('click', () => ExpenseForm.render());
+        document.getElementById('mob-add-expense').addEventListener('click', () => {
+            ExpenseForm.render();
+            document.getElementById('side-menu').classList.add('hidden');
+        });
+
+        document.getElementById('pc-add-income').addEventListener('click', () => IncomeForm.render(false));
+        document.getElementById('mob-add-income').addEventListener('click', () => {
+            IncomeForm.render(false);
+            document.getElementById('side-menu').classList.add('hidden');
+        });
+
+        document.getElementById('pc-add-salary').addEventListener('click', () => IncomeForm.render(true));
+        document.getElementById('mob-add-salary').addEventListener('click', () => {
+            IncomeForm.render(true);
+            document.getElementById('side-menu').classList.add('hidden');
+        });
+
+        const menuOpen = document.getElementById('menu-open');
+        const menuClose = document.getElementById('menu-close');
+        const sideMenu = document.getElementById('side-menu');
+        menuOpen.addEventListener('click', () => sideMenu.classList.remove('hidden'));
+        menuClose.addEventListener('click', () => sideMenu.classList.add('hidden'));
+
+        // 2. LÓGICA DE SALDOS Y PERIODOS
         const actualizarSaldosRealTime = () => {
             const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
             const displayMes = document.getElementById('current-period-display');
@@ -114,31 +136,29 @@
                 let saldoING = InitialBalances.ing;
                 let saldoPension = InitialBalances.pension;
 
-                // Buscamos la última nómina para definir el nombre del periodo
+                // Definir nombre del periodo según última nómina
                 const nominas = movements.filter(m => m.type === 'salary');
                 if (nominas.length > 0) {
-                    const ultimaNomina = nominas[nominas.length - 1];
-                    // Si en la nota pusiste "Nómina Febrero", el dashboard mostrará "Febrero"
-                    displayMes.innerText = ultimaNomina.note || "Nuevo Periodo";
+                    displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
                 } else {
                     const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
                     displayMes.innerText = meses[new Date().getMonth()] + " " + new Date().getFullYear();
                 }
 
-                // Cálculo de saldos acumulados
+                // Cálculo matemático
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
                     if (m.type === 'expense') {
                         if (m.account === 'bbva') saldoBBVA -= cant;
-                        else saldoING -= cant;
+                        else if (m.account === 'ing') saldoING -= cant;
                     }
                     else if (m.type === 'income' || m.type === 'salary') {
                         if (m.account === 'bbva') saldoBBVA += cant;
-                        else saldoING += cant;
+                        else if (m.account === 'ing') saldoING += cant;
                     }
                     else if (m.type === 'transfer') {
                         if (m.account === 'bbva') { saldoBBVA -= cant; saldoING += cant; }
-                        else { saldoING -= cant; saldoBBVA += cant; }
+                        else if (m.account === 'ing') { saldoING -= cant; saldoBBVA += cant; }
                     }
                 });
 
@@ -148,34 +168,13 @@
             });
         };
 
-        actualizarSaldosRealTime();
-
-        // Eventos
-        document.getElementById('pc-add-expense').addEventListener('click', () => ExpenseForm.render());
-        document.getElementById('mob-add-expense').addEventListener('click', () => {
-            ExpenseForm.render();
-            document.getElementById('side-menu').classList.add('hidden');
-        });
-        document.getElementById('pc-add-income').addEventListener('click', () => IncomeForm.render(false));
-        document.getElementById('mob-add-income').addEventListener('click', () => {
-            IncomeForm.render(false);
-            document.getElementById('side-menu').classList.add('hidden');
-        });
-        document.getElementById('pc-add-salary').addEventListener('click', () => IncomeForm.render(true));
-        document.getElementById('mob-add-salary').addEventListener('click', () => {
-            IncomeForm.render(true);
-            document.getElementById('side-menu').classList.add('hidden');
-        });
-        document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
-        document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
-        document.getElementById('mob-logout').addEventListener('click', () => AuthService.logout());
-
-        const menuOpen = document.getElementById('menu-open');
-        const menuClose = document.getElementById('menu-close');
-        const sideMenu = document.getElementById('side-menu');
-        menuOpen.addEventListener('click', () => sideMenu.classList.remove('hidden'));
-        menuClose.addEventListener('click', () => sideMenu.classList.add('hidden'));
+        // 3. ARRANCAR SERVICIOS
+        try {
+            AuthGuard.verifyAccess();
+            actualizarSaldosRealTime();
+        } catch (e) {
+            console.error("Error al iniciar servicios:", e);
+        }
     </script>
 </body>
-
 </html>
