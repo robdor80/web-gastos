@@ -50,6 +50,7 @@
                     <li id="pc-add-expense">✏️ Gasto</li>
                     <li id="pc-add-income">💰 Ingreso</li>
                     <li id="pc-add-salary">🏦 Nómina</li>
+                    <li id="pc-history">📋 Historial</li>
                     <li id="pc-logout" style="color: #d32f2f;">🚪 Salir</li>
                 </ul>
             </nav>
@@ -74,6 +75,7 @@
                         <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
                         <div class="nav-item" id="mob-add-income">💰 Añadir Ingreso</div>
                         <div class="nav-item" id="mob-add-salary">🏦 Registrar Nómina</div>
+                        <div class="nav-item" id="mob-history">📋 Historial de Periodos</div>
                         <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
                     </nav>
                 </div>
@@ -87,31 +89,40 @@
         import { InitialBalances } from './js/config/initialBalances.js';
         import { ExpenseForm } from './js/components/expenseForm.js';
         import { IncomeForm } from './js/components/incomeForm.js';
+        import { HistoryView } from './js/components/historyView.js';
         import { DbService } from './js/firebase/db.js';
 
         const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+        let cacheMovements = [];
 
         // Eventos
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
+        
+        // Acciones
         document.getElementById('pc-add-expense').onclick = () => ExpenseForm.render();
-        document.getElementById('mob-add-expense').onclick = () => { ExpenseForm.render(); document.getElementById('side-menu').classList.add('hidden'); };
+        document.getElementById('mob-add-expense').onclick = () => { ExpenseForm.render(); sideMenu.classList.add('hidden'); };
+        
         document.getElementById('pc-add-income').onclick = () => IncomeForm.render(false);
-        document.getElementById('mob-add-income').onclick = () => { IncomeForm.render(false); document.getElementById('side-menu').classList.add('hidden'); };
+        document.getElementById('mob-add-income').onclick = () => { IncomeForm.render(false); sideMenu.classList.add('hidden'); };
+        
         document.getElementById('pc-add-salary').onclick = () => IncomeForm.render(true);
-        document.getElementById('mob-add-salary').onclick = () => { IncomeForm.render(true); document.getElementById('side-menu').classList.add('hidden'); };
+        document.getElementById('mob-add-salary').onclick = () => { IncomeForm.render(true); sideMenu.classList.add('hidden'); };
+
+        document.getElementById('pc-history').onclick = () => HistoryView.render(cacheMovements);
+        document.getElementById('mob-history').onclick = () => { HistoryView.render(cacheMovements); sideMenu.classList.add('hidden'); };
         
         const sideMenu = document.getElementById('side-menu');
         document.getElementById('menu-open').onclick = () => sideMenu.classList.remove('hidden');
         document.getElementById('menu-close').onclick = () => sideMenu.classList.add('hidden');
 
-        // LÓGICA DASHBOARD
+        // Dashboard
         const mostrarSaldosActuales = (movements = []) => {
+            cacheMovements = movements;
             let sBBVA = parseFloat(InitialBalances.bbva);
             let sING = parseFloat(InitialBalances.ing);
             let sPension = parseFloat(InitialBalances.pension);
-            
             const displayMes = document.getElementById('current-period-display');
 
             if (movements.length > 0) {
@@ -120,22 +131,20 @@
 
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
-                    const isPension = m.category === "Plan de Pensiones" || m.subcategory === "Plan de Pensiones" || m.note === "Plan de Pensiones";
+                    const isPension = m.category === "Plan de Pensiones" || m.subcategory === "Plan de Pensiones";
 
                     if (m.type === 'expense') {
                         if (m.account === 'bbva') sBBVA -= cant; else sING -= cant;
-                        if (isPension) sPension += cant; // Si el gasto era para la pensión, sumamos allí
-                    } 
-                    else if (m.type === 'income' || m.type === 'salary') {
+                        if (isPension) sPension += cant;
+                    } else if (m.type === 'income' || m.type === 'salary') {
                         if (m.account === 'bbva') sBBVA += cant; else sING += cant;
-                    } 
-                    else if (m.type === 'transfer') {
+                    } else if (m.type === 'transfer') {
                         if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
                         else { sING -= cant; sBBVA += cant; }
                     }
                 });
             } else {
-                displayMes.innerText = "Febrero 2026";
+                displayMes.innerText = "Enero 2026";
             }
 
             document.getElementById('saldo-bbva').innerText = f.format(sBBVA);
@@ -143,16 +152,10 @@
             document.getElementById('saldo-pension').innerText = f.format(sPension);
         };
 
-        mostrarSaldosActuales();
-
         try {
             AuthGuard.verifyAccess();
-            DbService.subscribeToBalances((movements) => {
-                mostrarSaldosActuales(movements);
-            });
-        } catch (error) {
-            console.error(error);
-        }
+            DbService.subscribeToBalances((movements) => mostrarSaldosActuales(movements));
+        } catch (error) { console.error(error); }
     </script>
 </body>
 </html>
