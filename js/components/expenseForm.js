@@ -1,16 +1,24 @@
 /**
  * ExpenseForm - Lógica del Formulario de Gastos
- * Maneja la visualización y la carga dinámica de categorías.
+ * Maneja la visualización, carga dinámica de categorías y visibilidad del dashboard.
  */
 import { Categories } from '../config/categories.js';
 
 export const ExpenseForm = {
     render() {
         const container = document.getElementById('dynamic-content');
+        const dashboard = document.querySelector('.dashboard-grid');
         
+        // 1. Ocultamos las tarjetas del dashboard
+        dashboard.classList.add('hidden');
+        
+        // 2. Pintamos el formulario con un botón de "Cancelar" para volver
         container.innerHTML = `
             <div class="form-container">
-                <h3 style="margin-bottom: 20px; text-align: center;">✏️ Nuevo Gasto</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="margin:0;">✏️ Nuevo Gasto</h3>
+                    <button id="btn-close-form" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+                </div>
                 
                 <div class="form-group">
                     <label>Importe (€)</label>
@@ -46,6 +54,7 @@ export const ExpenseForm = {
                 </div>
 
                 <button class="btn-save" id="btn-save-expense">Guardar Gasto</button>
+                <p id="cancel-link" style="text-align:center; margin-top:15px; color:#e74c3c; cursor:pointer; font-weight:600;">Cancelar y volver</p>
             </div>
         `;
 
@@ -56,11 +65,20 @@ export const ExpenseForm = {
         const categorySelect = document.getElementById('exp-category');
         const subcategorySelect = document.getElementById('exp-subcategory');
         const btnSave = document.getElementById('btn-save-expense');
+        const btnClose = document.getElementById('btn-close-form');
+        const cancelLink = document.getElementById('cancel-link');
 
-        // Lógica de cascada: Al cambiar categoría, se cargan sus subcategorías
+        // Función para cerrar formulario y mostrar dashboard
+        const cerrarFormulario = () => {
+            document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>';
+            document.querySelector('.dashboard-grid').classList.remove('hidden');
+        };
+
+        btnClose.addEventListener('click', cerrarFormulario);
+        cancelLink.addEventListener('click', cerrarFormulario);
+
         categorySelect.addEventListener('change', (e) => {
             const selectedCat = Categories.find(cat => cat.id === e.target.value);
-            
             if (selectedCat) {
                 subcategorySelect.innerHTML = selectedCat.subcategories
                     .map(sub => `<option value="${sub.toLowerCase()}">${sub}</option>`)
@@ -72,24 +90,16 @@ export const ExpenseForm = {
             }
         });
 
-        // Evento de guardado (por ahora solo log, luego conectaremos con Firebase)
         btnSave.addEventListener('click', () => {
-            const data = {
-                amount: document.getElementById('exp-amount').value,
-                account: document.getElementById('exp-account').value,
-                category: categorySelect.value,
-                subcategory: subcategorySelect.value,
-                note: document.getElementById('exp-note').value,
-                date: new Date().toISOString()
-            };
-
-            if (!data.amount || !data.category) {
-                alert("Por favor, rellena al menos el importe y la categoría.");
+            const amount = document.getElementById('exp-amount').value;
+            if (!amount || categorySelect.value === "") {
+                alert("Por favor, rellena importe y categoría.");
                 return;
             }
-
-            console.log("Datos listos para Firebase:", data);
-            alert("Gasto capturado (Lógica de guardado en el siguiente paso)");
+            
+            // Aquí irá la conexión a Firebase en el siguiente paso
+            alert("¡Listo! En el siguiente paso este botón restará dinero de tu saldo.");
+            cerrarFormulario();
         });
     }
 };
