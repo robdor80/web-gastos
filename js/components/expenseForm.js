@@ -41,13 +41,23 @@ export const ExpenseForm = {
                     </label>
                 </div>
 
-                <div id="category-section">
+                <div id="category-logic-section">
                     <div class="form-group">
                         <label>Categoría</label>
                         <select id="exp-category">
                             <option value="">Selecciona...</option>
                             ${Categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('')}
+                            <option value="new-cat">+ Crear Nueva Categoría</option>
                         </select>
+                        <input type="text" id="new-category-name" class="hidden" placeholder="Nombre de la nueva categoría" style="margin-top:10px;">
+                    </div>
+
+                    <div class="form-group" id="sub-group">
+                        <label>Subcategoría</label>
+                        <select id="exp-subcategory" disabled>
+                            <option value="">Elige categoría primero</option>
+                        </select>
+                        <input type="text" id="new-subcategory-name" class="hidden" placeholder="Nombre de la nueva subcategoría" style="margin-top:10px;">
                     </div>
                 </div>
 
@@ -66,16 +76,52 @@ export const ExpenseForm = {
 
     setupLogic() {
         const btnSave = document.getElementById('btn-save-expense');
+        const catSelect = document.getElementById('exp-category');
+        const subSelect = document.getElementById('exp-subcategory');
+        const newCatInput = document.getElementById('new-category-name');
+        const newSubInput = document.getElementById('new-subcategory-name');
         const isTransferCheck = document.getElementById('is-transfer');
-        const categorySection = document.getElementById('category-section');
+        const categoryLogic = document.getElementById('category-logic-section');
 
         const cerrar = () => {
             document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción para empezar.</p>';
             document.querySelector('.dashboard-grid').classList.remove('hidden');
         };
 
+        // Lógica de Traspasos
         isTransferCheck.addEventListener('change', (e) => {
-            categorySection.style.display = e.target.checked ? 'none' : 'block';
+            categoryLogic.style.display = e.target.checked ? 'none' : 'block';
+        });
+
+        // Lógica de Categorías y Subcategorías
+        catSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            
+            // Resetear inputs nuevos
+            newCatInput.classList.add('hidden');
+            newSubInput.classList.add('hidden');
+            subSelect.classList.remove('hidden');
+
+            if (val === 'new-cat') {
+                newCatInput.classList.remove('hidden');
+                subSelect.disabled = true;
+                newSubInput.classList.remove('hidden');
+            } else if (val !== "") {
+                const selectedCat = Categories.find(c => c.id === val);
+                subSelect.disabled = false;
+                subSelect.innerHTML = selectedCat.subcategories.map(s => `<option value="${s.toLowerCase()}">${s}</option>`).join('') + '<option value="new-sub">+ Nueva Subcategoría</option>';
+            } else {
+                subSelect.disabled = true;
+                subSelect.innerHTML = '<option value="">Elige categoría primero</option>';
+            }
+        });
+
+        subSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'new-sub') {
+                newSubInput.classList.remove('hidden');
+            } else {
+                newSubInput.classList.add('hidden');
+            }
         });
 
         btnSave.addEventListener('click', async () => {
@@ -83,14 +129,22 @@ export const ExpenseForm = {
             if (!amount) return alert("Introduce el importe");
 
             const isTransfer = isTransferCheck.checked;
-            const account = document.getElementById('exp-account').value;
+            
+            // Determinar categoría final
+            let finalCat = catSelect.value === 'new-cat' ? newCatInput.value : catSelect.value;
+            let finalSub = subSelect.value === 'new-sub' ? newSubInput.value : subSelect.value;
+
+            if (isTransfer) {
+                finalCat = 'Traspaso';
+                finalSub = document.getElementById('exp-account').value === 'bbva' ? 'A ING' : 'A BBVA';
+            }
 
             const movementData = {
                 type: isTransfer ? 'transfer' : 'expense',
                 amount: amount,
-                account: account,
-                category: isTransfer ? 'Traspaso' : document.getElementById('exp-category').value,
-                subcategory: isTransfer ? (account === 'bbva' ? 'A ING' : 'A BBVA') : '',
+                account: document.getElementById('exp-account').value,
+                category: finalCat,
+                subcategory: finalSub,
                 note: document.getElementById('exp-note').value,
                 dateCustom: document.getElementById('exp-date').value,
                 user: "Roberto"
@@ -101,16 +155,11 @@ export const ExpenseForm = {
 
             try {
                 const ok = await DbService.saveMovement(movementData);
-                if (ok) {
-                    alert("✅ Registrado con éxito");
-                    cerrar();
-                } else {
-                    throw new Error();
-                }
+                if (ok) { alert("✅ Guardado correctamente"); cerrar(); }
             } catch (e) {
-                alert("❌ Error al guardar");
-                btnSave.innerText = "Guardar Movimiento";
+                alert("❌ Error");
                 btnSave.disabled = false;
+                btnSave.innerText = "Guardar Movimiento";
             }
         });
 
