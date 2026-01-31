@@ -1,11 +1,14 @@
 /**
- * AuthGuard - Seguridad Nivel 3
- * Este archivo controla el flujo: Login Google -> Teclado PIN -> Dashboard
+ * AuthGuard - Seguridad Nivel 3 con Bloqueo por Inactividad
+ * Tras 3 minutos, devuelve al usuario a la pantalla del PIN.
  */
 import { AuthService } from '../firebase/auth.js';
 import { PinPad } from '../components/pinPad.js';
 
 export const AuthGuard = {
+    timer: null,
+    inactivityLimit: 180000, // 3 minutos en milisegundos
+
     verifyAccess() {
         AuthService.initAuthObserver((user) => {
             const loginSection = document.getElementById('login-section');
@@ -13,27 +16,60 @@ export const AuthGuard = {
             const appSection = document.getElementById('app-section');
 
             if (user) {
-                // 1. Google nos ha dado el OK.
-                // Ocultamos Login y mostramos el PIN (la App sigue oculta)
+                // Usuario autenticado en Google
                 loginSection.classList.add('hidden');
-                pinSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
-
-                // 2. Activamos el teclado PIN
-                // Le decimos que, si el PIN es correcto, ejecute lo que hay dentro
-                PinPad.init(() => {
-                    // 3. PIN Correcto. Mostramos la App y ocultamos el teclado
-                    pinSection.classList.add('hidden');
-                    appSection.classList.remove('hidden');
-                    console.log("Acceso total concedido tras PIN");
-                });
-                
+                this.showPinScreen(); // Lanzamos el flujo del PIN
             } else {
-                // Si no hay usuario logueado en Google, todos a la pantalla de Login
+                // Sin sesión de Google
                 loginSection.classList.remove('hidden');
                 pinSection.classList.add('hidden');
                 appSection.classList.add('hidden');
+                this.stopInactivityTimer();
             }
         });
+    },
+
+    showPinScreen() {
+        const pinSection = document.getElementById('pin-section');
+        const appSection = document.getElementById('app-section');
+
+        pinSection.classList.remove('hidden');
+        appSection.classList.add('hidden');
+
+        // Iniciamos el teclado
+        PinPad.init(() => {
+            // PIN Correcto
+            pinSection.classList.add('hidden');
+            appSection.classList.remove('hidden');
+            
+            // Empezamos a vigilar la inactividad
+            this.startInactivityTimer();
+        });
+    },
+
+    startInactivityTimer() {
+        this.stopInactivityTimer();
+        this.setupListeners();
+        this.resetTimer();
+    },
+
+    setupListeners() {
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+        events.forEach(name => {
+            // Cada vez que el usuario hace algo, el tiempo vuelve a empezar
+            document.addEventListener(name, () => this.resetTimer(), true);
+        });
+    },
+
+    resetTimer() {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            console.log("Inactividad detectada: Bloqueando con PIN");
+            this.showPinScreen(); // Volver al PIN
+        }, this.inactivityLimit);
+    },
+
+    stopInactivityTimer() {
+        if (this.timer) clearTimeout(this.timer);
     }
 };
