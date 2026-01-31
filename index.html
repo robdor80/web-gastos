@@ -75,7 +75,7 @@
                         <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
                         <div class="nav-item" id="mob-add-income">💰 Añadir Ingreso</div>
                         <div class="nav-item" id="mob-add-salary">🏦 Registrar Nómina</div>
-                        <div class="nav-item" id="mob-history">📋 Historial de Periodos</div>
+                        <div class="nav-item" id="mob-history">📋 Historial</div>
                         <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
                     </nav>
                 </div>
@@ -95,12 +95,11 @@
         const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
         let cacheMovements = [];
 
-        // Eventos
+        // EVENTOS
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
         
-        // Acciones
         document.getElementById('pc-add-expense').onclick = () => ExpenseForm.render();
         document.getElementById('mob-add-expense').onclick = () => { ExpenseForm.render(); sideMenu.classList.add('hidden'); };
         
@@ -117,9 +116,9 @@
         document.getElementById('menu-open').onclick = () => sideMenu.classList.remove('hidden');
         document.getElementById('menu-close').onclick = () => sideMenu.classList.add('hidden');
 
-        // Dashboard
+        // LÓGICA DE ACTUALIZACIÓN
         const mostrarSaldosActuales = (movements = []) => {
-            cacheMovements = movements;
+            cacheMovements = movements; 
             let sBBVA = parseFloat(InitialBalances.bbva);
             let sING = parseFloat(InitialBalances.ing);
             let sPension = parseFloat(InitialBalances.pension);
@@ -136,9 +135,11 @@
                     if (m.type === 'expense') {
                         if (m.account === 'bbva') sBBVA -= cant; else sING -= cant;
                         if (isPension) sPension += cant;
-                    } else if (m.type === 'income' || m.type === 'salary') {
+                    } 
+                    else if (m.type === 'income' || m.type === 'salary') {
                         if (m.account === 'bbva') sBBVA += cant; else sING += cant;
-                    } else if (m.type === 'transfer') {
+                    } 
+                    else if (m.type === 'transfer') {
                         if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
                         else { sING -= cant; sBBVA += cant; }
                     }
@@ -152,9 +153,19 @@
             document.getElementById('saldo-pension').innerText = f.format(sPension);
         };
 
+        // SUSCRIPCIÓN EN TIEMPO REAL
         try {
             AuthGuard.verifyAccess();
-            DbService.subscribeToBalances((movements) => mostrarSaldosActuales(movements));
+            DbService.subscribeToBalances((movements) => {
+                // 1. Actualizar tarjetas y saldos
+                mostrarSaldosActuales(movements);
+                
+                // 2. Si el historial está en pantalla, refrescarlo automáticamente
+                const historyContainer = document.getElementById('history-list-container');
+                if (historyContainer) {
+                    HistoryView.filterAndShow(movements);
+                }
+            });
         } catch (error) { console.error(error); }
     </script>
 </body>
