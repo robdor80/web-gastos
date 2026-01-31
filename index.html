@@ -10,12 +10,21 @@
 <body>
 
     <div id="app-container">
+        <header class="app-header">
+            <div class="menu-burguer-container" id="menu-open">
+                <div class="menu-burguer"><span></span><span></span><span></span></div>
+            </div>
+            <div class="logo-period"><span id="current-period-display">Cargando...</span></div>
+            <div id="user-display"></div>
+        </header>
+
         <section id="login-section">
-            <h1 style="font-size: 2rem; margin-bottom: 10px;">Finanzas Familiares</h1>
-            <p style="color: #65676b;">Acceso seguro mediante lista blanca</p>
-            <button id="btn-login" style="padding: 15px 30px; background:#4285F4; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">
-                Entrar con Google
-            </button>
+            <h1 style="font-size: 2rem; margin-top: 50px; text-align:center;">Finanzas Familiares</h1>
+            <div style="text-align:center;">
+                <button id="btn-login" style="padding: 15px 30px; background:#4285F4; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">
+                    Entrar con Google
+                </button>
+            </div>
         </section>
 
         <section id="pin-section" class="hidden">
@@ -36,14 +45,6 @@
         </section>
 
         <section id="app-section" class="hidden">
-            <header class="app-header">
-                <div class="menu-burguer-container" id="menu-open">
-                    <div class="menu-burguer"><span></span><span></span><span></span></div>
-                </div>
-                <div class="logo-period"><span id="current-period-display">Cargando...</span></div>
-                <div id="user-display"></div>
-            </header>
-
             <nav class="pc-nav-bar">
                 <ul>
                     <li id="pc-add-expense">✏️ Gasto</li>
@@ -90,7 +91,7 @@
 
         const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
 
-        // 1. ASIGNACIÓN DE EVENTOS
+        // Eventos
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
@@ -105,51 +106,52 @@
         document.getElementById('menu-open').onclick = () => sideMenu.classList.remove('hidden');
         document.getElementById('menu-close').onclick = () => sideMenu.classList.add('hidden');
 
-        // 2. FUNCIÓN PARA PINTAR DATOS (Síncrona para que sea instantánea)
+        // LÓGICA DASHBOARD
         const mostrarSaldosActuales = (movements = []) => {
-            let saldoBBVA = parseFloat(InitialBalances.bbva);
-            let saldoING = parseFloat(InitialBalances.ing);
-            let saldoPension = parseFloat(InitialBalances.pension);
+            let sBBVA = parseFloat(InitialBalances.bbva);
+            let sING = parseFloat(InitialBalances.ing);
+            let sPension = parseFloat(InitialBalances.pension);
             
             const displayMes = document.getElementById('current-period-display');
 
             if (movements.length > 0) {
                 const nominas = movements.filter(m => m.type === 'salary');
                 if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
-                
+
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
+                    const isPension = m.category === "Plan de Pensiones" || m.subcategory === "Plan de Pensiones" || m.note === "Plan de Pensiones";
+
                     if (m.type === 'expense') {
-                        if (m.account === 'bbva') saldoBBVA -= cant; else saldoING -= cant;
-                    } else if (m.type === 'income' || m.type === 'salary') {
-                        if (m.account === 'bbva') saldoBBVA += cant; else saldoING += cant;
-                    } else if (m.type === 'transfer') {
-                        if (m.account === 'bbva') { saldoBBVA -= cant; saldoING += cant; }
-                        else { saldoING -= cant; saldoBBVA += cant; }
+                        if (m.account === 'bbva') sBBVA -= cant; else sING -= cant;
+                        if (isPension) sPension += cant; // Si el gasto era para la pensión, sumamos allí
+                    } 
+                    else if (m.type === 'income' || m.type === 'salary') {
+                        if (m.account === 'bbva') sBBVA += cant; else sING += cant;
+                    } 
+                    else if (m.type === 'transfer') {
+                        if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
+                        else { sING -= cant; sBBVA += cant; }
                     }
                 });
             } else {
-                const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                displayMes.innerText = meses[new Date().getMonth()] + " " + new Date().getFullYear();
+                displayMes.innerText = "Febrero 2026";
             }
 
-            document.getElementById('saldo-bbva').innerText = f.format(saldoBBVA);
-            document.getElementById('saldo-ing').innerText = f.format(saldoING);
-            document.getElementById('saldo-pension').innerText = f.format(saldoPension);
+            document.getElementById('saldo-bbva').innerText = f.format(sBBVA);
+            document.getElementById('saldo-ing').innerText = f.format(sING);
+            document.getElementById('saldo-pension').innerText = f.format(sPension);
         };
 
-        // 3. INICIO DE LA APP
-        // Mostramos saldos iniciales YA
         mostrarSaldosActuales();
 
-        // Luego escuchamos a Firebase para actualizar si hay cambios
         try {
             AuthGuard.verifyAccess();
             DbService.subscribeToBalances((movements) => {
                 mostrarSaldosActuales(movements);
             });
         } catch (error) {
-            console.error("Error en arranque:", error);
+            console.error(error);
         }
     </script>
 </body>

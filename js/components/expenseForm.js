@@ -62,7 +62,7 @@ export const ExpenseForm = {
                 </div>
 
                 <div class="form-group">
-                    <label>Nota</label>
+                    <label>Nota / Comentario</label>
                     <input type="text" id="exp-note" placeholder="Opcional">
                 </div>
 
@@ -88,19 +88,14 @@ export const ExpenseForm = {
             document.querySelector('.dashboard-grid').classList.remove('hidden');
         };
 
-        // Lógica de Traspasos
         isTransferCheck.addEventListener('change', (e) => {
             categoryLogic.style.display = e.target.checked ? 'none' : 'block';
         });
 
-        // Lógica de Categorías y Subcategorías
         catSelect.addEventListener('change', (e) => {
             const val = e.target.value;
-            
-            // Resetear inputs nuevos
             newCatInput.classList.add('hidden');
             newSubInput.classList.add('hidden');
-            subSelect.classList.remove('hidden');
 
             if (val === 'new-cat') {
                 newCatInput.classList.remove('hidden');
@@ -109,7 +104,7 @@ export const ExpenseForm = {
             } else if (val !== "") {
                 const selectedCat = Categories.find(c => c.id === val);
                 subSelect.disabled = false;
-                subSelect.innerHTML = selectedCat.subcategories.map(s => `<option value="${s.toLowerCase()}">${s}</option>`).join('') + '<option value="new-sub">+ Nueva Subcategoría</option>';
+                subSelect.innerHTML = selectedCat.subcategories.map(s => `<option value="${s}">${s}</option>`).join('') + '<option value="new-sub">+ Nueva Subcategoría</option>';
             } else {
                 subSelect.disabled = true;
                 subSelect.innerHTML = '<option value="">Elige categoría primero</option>';
@@ -117,11 +112,8 @@ export const ExpenseForm = {
         });
 
         subSelect.addEventListener('change', (e) => {
-            if (e.target.value === 'new-sub') {
-                newSubInput.classList.remove('hidden');
-            } else {
-                newSubInput.classList.add('hidden');
-            }
+            if (e.target.value === 'new-sub') newSubInput.classList.remove('hidden');
+            else newSubInput.classList.add('hidden');
         });
 
         btnSave.addEventListener('click', async () => {
@@ -129,8 +121,6 @@ export const ExpenseForm = {
             if (!amount) return alert("Introduce el importe");
 
             const isTransfer = isTransferCheck.checked;
-            
-            // Determinar categoría final
             let finalCat = catSelect.value === 'new-cat' ? newCatInput.value : catSelect.value;
             let finalSub = subSelect.value === 'new-sub' ? newSubInput.value : subSelect.value;
 
@@ -153,14 +143,9 @@ export const ExpenseForm = {
             btnSave.innerText = "Guardando...";
             btnSave.disabled = true;
 
-            try {
-                const ok = await DbService.saveMovement(movementData);
-                if (ok) { alert("✅ Guardado correctamente"); cerrar(); }
-            } catch (e) {
-                alert("❌ Error");
-                btnSave.disabled = false;
-                btnSave.innerText = "Guardar Movimiento";
-            }
+            const ok = await DbService.saveMovement(movementData);
+            if (ok) { alert("✅ Guardado correctamente"); cerrar(); }
+            else { alert("❌ Error"); btnSave.disabled = false; btnSave.innerText = "Guardar"; }
         });
 
         document.getElementById('btn-close-form').onclick = cerrar;
