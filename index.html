@@ -103,26 +103,31 @@
         import { IncomeForm } from './js/components/incomeForm.js';
         import { DbService } from './js/firebase/db.js';
 
-        // 1. Iniciar seguridad
         AuthGuard.verifyAccess();
 
-        // 2. Función Maestra: Calcular y mostrar saldos reales
         const actualizarSaldosRealTime = () => {
-            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const d = new Date();
-            document.getElementById('current-period-display').innerText = `${meses[d.getMonth()]} ${d.getFullYear()}`;
-
             const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+            const displayMes = document.getElementById('current-period-display');
 
-            // Nos suscribimos a los cambios de la base de datos
             DbService.subscribeToBalances((movements) => {
                 let saldoBBVA = InitialBalances.bbva;
                 let saldoING = InitialBalances.ing;
                 let saldoPension = InitialBalances.pension;
 
+                // Buscamos la última nómina para definir el nombre del periodo
+                const nominas = movements.filter(m => m.type === 'salary');
+                if (nominas.length > 0) {
+                    const ultimaNomina = nominas[nominas.length - 1];
+                    // Si en la nota pusiste "Nómina Febrero", el dashboard mostrará "Febrero"
+                    displayMes.innerText = ultimaNomina.note || "Nuevo Periodo";
+                } else {
+                    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                    displayMes.innerText = meses[new Date().getMonth()] + " " + new Date().getFullYear();
+                }
+
+                // Cálculo de saldos acumulados
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
-
                     if (m.type === 'expense') {
                         if (m.account === 'bbva') saldoBBVA -= cant;
                         else saldoING -= cant;
@@ -132,17 +137,11 @@
                         else saldoING += cant;
                     }
                     else if (m.type === 'transfer') {
-                        if (m.account === 'bbva') {
-                            saldoBBVA -= cant;
-                            saldoING += cant;
-                        } else {
-                            saldoING -= cant;
-                            saldoBBVA += cant;
-                        }
+                        if (m.account === 'bbva') { saldoBBVA -= cant; saldoING += cant; }
+                        else { saldoING -= cant; saldoBBVA += cant; }
                     }
                 });
 
-                // Actualizar la pantalla
                 document.getElementById('saldo-bbva').innerText = f.format(saldoBBVA);
                 document.getElementById('saldo-ing').innerText = f.format(saldoING);
                 document.getElementById('saldo-pension').innerText = f.format(saldoPension);
@@ -151,25 +150,22 @@
 
         actualizarSaldosRealTime();
 
-        // 3. Eventos de los botones
+        // Eventos
         document.getElementById('pc-add-expense').addEventListener('click', () => ExpenseForm.render());
         document.getElementById('mob-add-expense').addEventListener('click', () => {
             ExpenseForm.render();
             document.getElementById('side-menu').classList.add('hidden');
         });
-
         document.getElementById('pc-add-income').addEventListener('click', () => IncomeForm.render(false));
         document.getElementById('mob-add-income').addEventListener('click', () => {
             IncomeForm.render(false);
             document.getElementById('side-menu').classList.add('hidden');
         });
-
         document.getElementById('pc-add-salary').addEventListener('click', () => IncomeForm.render(true));
         document.getElementById('mob-add-salary').addEventListener('click', () => {
             IncomeForm.render(true);
             document.getElementById('side-menu').classList.add('hidden');
         });
-
         document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
         document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
         document.getElementById('mob-logout').addEventListener('click', () => AuthService.logout());
@@ -177,7 +173,6 @@
         const menuOpen = document.getElementById('menu-open');
         const menuClose = document.getElementById('menu-close');
         const sideMenu = document.getElementById('side-menu');
-
         menuOpen.addEventListener('click', () => sideMenu.classList.remove('hidden'));
         menuClose.addEventListener('click', () => sideMenu.classList.add('hidden'));
     </script>
