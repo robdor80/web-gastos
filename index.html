@@ -69,7 +69,9 @@
                         <span class="balance" id="saldo-pension">0,00 €</span>
                     </div>
                 </div>
-                <div id="dynamic-content"></div>
+                <div id="dynamic-content">
+                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>
+                </div>
             </main>
 
             <aside id="side-menu" class="side-menu-overlay hidden">
@@ -78,7 +80,7 @@
                         <h3>Menú</h3><button id="menu-close" style="background:none; border:none; font-size:1.8rem;">✕</button>
                     </div>
                     <nav>
-                        <div class="nav-item">✏️ Añadir Gasto</div>
+                        <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
                         <div class="nav-item">💰 Añadir Ingreso</div>
                         <div class="nav-item">🏦 Registrar Nómina</div>
                         <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
@@ -92,16 +94,13 @@
         import { AuthService } from './js/firebase/auth.js';
         import { AuthGuard } from './js/middleware/authGuard.js';
         import { InitialBalances } from './js/config/initialBalances.js';
+        import { ExpenseForm } from './js/components/expenseForm.js';
 
-        // 1. Mostrar fecha y saldos iniciales
         const cargarDashboard = () => {
             const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const d = new Date();
             document.getElementById('current-period-display').innerText = `${meses[d.getMonth()]} ${d.getFullYear()}`;
-            
-            // Formatear números a moneda Euro
             const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
-            
             document.getElementById('saldo-bbva').innerText = f.format(InitialBalances.bbva);
             document.getElementById('saldo-ing').innerText = f.format(InitialBalances.ing);
             document.getElementById('saldo-pension').innerText = f.format(InitialBalances.pension);
@@ -109,6 +108,13 @@
 
         AuthGuard.verifyAccess();
         cargarDashboard();
+
+        // Botón de Gasto (PC y Móvil)
+        document.getElementById('pc-add-expense').addEventListener('click', () => ExpenseForm.render());
+        document.getElementById('mob-add-expense').addEventListener('click', () => {
+            ExpenseForm.render();
+            document.getElementById('side-menu').classList.add('hidden'); // Cerrar menú al abrir form
+        });
 
         document.getElementById('btn-login').addEventListener('click', () => AuthService.login());
         document.getElementById('pc-logout').addEventListener('click', () => AuthService.logout());
