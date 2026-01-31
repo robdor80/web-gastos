@@ -1,5 +1,5 @@
 /**
- * IncomeForm - Lógica para Ingresos y Nómina con conexión a Firebase
+ * IncomeForm - Con selector de fecha manual
  */
 import { DbService } from '../firebase/db.js';
 
@@ -7,8 +7,10 @@ export const IncomeForm = {
     render(isSalary = false) {
         const container = document.getElementById('dynamic-content');
         const dashboard = document.querySelector('.dashboard-grid');
-        
         dashboard.classList.add('hidden');
+        
+        // Obtenemos la fecha de hoy en formato YYYY-MM-DD para el input
+        const hoy = new Date().toISOString().split('T')[0];
         
         container.innerHTML = `
             <div class="form-container">
@@ -17,9 +19,10 @@ export const IncomeForm = {
                     <button id="btn-close-inc" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
                 </div>
                 
-                <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">
-                    * Usa este formulario para dinero que <b>no</b> viene de tus propias cuentas.
-                </p>
+                <div class="form-group">
+                    <label>Fecha del movimiento</label>
+                    <input type="date" id="inc-date" value="${hoy}">
+                </div>
 
                 <div class="form-group">
                     <label>Importe (€)</label>
@@ -27,7 +30,7 @@ export const IncomeForm = {
                 </div>
 
                 <div class="form-group">
-                    <label>Cuenta donde se recibe</label>
+                    <label>Cuenta de destino</label>
                     <select id="inc-account">
                         <option value="bbva">BBVA Principal</option>
                         <option value="ing">Ahorro ING</option>
@@ -36,7 +39,7 @@ export const IncomeForm = {
 
                 <div class="form-group">
                     <label>Concepto / Origen</label>
-                    <input type="text" id="inc-note" placeholder="${isSalary ? 'Nómina Enero' : 'Ej: Bizum de Juan'}">
+                    <input type="text" id="inc-note" placeholder="${isSalary ? 'Nómina Febrero' : 'Ej: Bizum de Juan'}">
                 </div>
 
                 <button class="btn-save" id="btn-save-income" style="background-color: #27ae60;">
@@ -51,50 +54,33 @@ export const IncomeForm = {
 
     setupLogic(isSalary) {
         const btnSave = document.getElementById('btn-save-income');
-        const btnClose = document.getElementById('btn-close-inc');
-        const cancelLink = document.getElementById('cancel-inc');
-
         const cerrar = () => {
             document.getElementById('dynamic-content').innerHTML = '<p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción para empezar.</p>';
             document.querySelector('.dashboard-grid').classList.remove('hidden');
         };
 
-        btnClose.addEventListener('click', cerrar);
-        cancelLink.addEventListener('click', cerrar);
-
         btnSave.addEventListener('click', async () => {
             const amount = document.getElementById('inc-amount').value;
-            const account = document.getElementById('inc-account').value;
-            const note = document.getElementById('inc-note').value;
+            const dateValue = document.getElementById('inc-date').value;
 
-            if (!amount) {
-                alert("Por favor, introduce el importe.");
-                return;
-            }
+            if (!amount || !dateValue) return alert("Faltan datos");
 
             const movementData = {
                 type: isSalary ? 'salary' : 'income',
                 amount: amount,
-                account: account,
+                account: document.getElementById('inc-account').value,
                 category: isSalary ? 'Nómina' : 'Ingreso Extra',
-                subcategory: isSalary ? 'Salario Mensual' : 'Varios',
-                note: note || (isSalary ? 'Nómina mensual' : 'Ingreso externo'),
+                note: document.getElementById('inc-note').value || (isSalary ? 'Nómina' : 'Ingreso'),
+                dateCustom: dateValue, // Guardamos la fecha que tú elijas
                 user: "Roberto"
             };
 
             btnSave.innerText = "Guardando...";
-            btnSave.disabled = true;
-
             const ok = await DbService.saveMovement(movementData);
-
-            if (ok) {
-                alert("✅ Ingreso guardado correctamente.");
-                cerrar();
-            } else {
-                alert("❌ Error al guardar en la nube.");
-                btnSave.innerText = isSalary ? 'Confirmar Nómina' : 'Guardar Ingreso';
-                btnSave.disabled = false;
-            }
+            if (ok) { alert("✅ Guardado con fecha: " + dateValue); cerrar(); }
         });
+
+        document.getElementById('btn-close-inc').onclick = cerrar;
+        document.getElementById('cancel-inc').onclick = cerrar;
     }
 };
