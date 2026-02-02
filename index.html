@@ -31,7 +31,7 @@
 
         .card:active { transform: scale(0.98); }
 
-        /* Logos en la esquina */
+        /* Logos en la esquina [cite: 42] */
         .bank-logo {
             position: absolute;
             top: 15px;
@@ -41,7 +41,7 @@
             opacity: 0.9;
         }
 
-        /* FONDOS SUAVES (Pastel) */
+        /* FONDOS SUAVES (Pastel) [cite: 43] */
         .card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
         .card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
         .card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
@@ -58,7 +58,7 @@
             font-size: 2.2rem; 
             font-weight: 800; 
             margin-top: 5px;
-            color: #2c3e50; /* Texto oscuro para máxima legibilidad */
+            color: #2c3e50; /* Texto oscuro para máxima legibilidad [cite: 44] */
         }
     </style>
 </head>
@@ -166,12 +166,16 @@
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
+        
         document.getElementById('pc-add-expense').onclick = () => ExpenseForm.render();
         document.getElementById('mob-add-expense').onclick = () => { ExpenseForm.render(); document.getElementById('side-menu').classList.add('hidden'); };
+        
         document.getElementById('pc-add-income').onclick = () => IncomeForm.render(false);
         document.getElementById('mob-add-income').onclick = () => { IncomeForm.render(false); document.getElementById('side-menu').classList.add('hidden'); };
+        
         document.getElementById('pc-add-salary').onclick = () => IncomeForm.render(true);
         document.getElementById('mob-add-salary').onclick = () => { IncomeForm.render(true); document.getElementById('side-menu').classList.add('hidden'); };
+        
         document.getElementById('pc-history').onclick = () => HistoryView.render(cacheMovements);
         document.getElementById('mob-history').onclick = () => { HistoryView.render(cacheMovements); document.getElementById('side-menu').classList.add('hidden'); };
         
@@ -179,6 +183,7 @@
         document.getElementById('menu-open').onclick = () => sideMenu.classList.remove('hidden');
         document.getElementById('menu-close').onclick = () => sideMenu.classList.add('hidden');
 
+        // Lógica de cálculo y renderizado de saldos [cite: 41, 76]
         const mostrarSaldosActuales = (movements = []) => {
             cacheMovements = movements;
             let sBBVA = parseFloat(InitialBalances.bbva);
@@ -187,6 +192,7 @@
             const displayMes = document.getElementById('current-period-display');
 
             if (movements.length > 0) {
+                // Nombre del mes basado en la última nómina [cite: 93]
                 const nominas = movements.filter(m => m.type === 'salary');
                 if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
 
@@ -199,7 +205,7 @@
                         if (isPension) sPension += cant;
                     } else if (m.type === 'income' || m.type === 'salary') {
                         if (m.account === 'bbva') sBBVA += cant; else sING += cant;
-                    } else if (m.type === 'transfer') {
+                    } else if (m.type === 'transfer') { // Lógica de traspasos [cite: 67, 68]
                         if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
                         else { sING -= cant; sBBVA += cant; }
                     }
@@ -213,14 +219,12 @@
             document.getElementById('saldo-pension').innerText = f.format(sPension);
         };
 
+        // INICIO DE LA APP: Delegamos la carga de datos al AuthGuard tras el PIN
         try {
-            AuthGuard.verifyAccess();
-            DbService.subscribeToBalances((movements) => {
-                mostrarSaldosActuales(movements);
-                const historyContainer = document.getElementById('history-list-container');
-                if (historyContainer) HistoryView.filterAndShow(movements);
-            });
-        } catch (error) { console.error(error); }
+            AuthGuard.verifyAccess(mostrarSaldosActuales);
+        } catch (error) { 
+            console.error("Error crítico de inicio:", error); 
+        }
     </script>
 </body>
 </html>
