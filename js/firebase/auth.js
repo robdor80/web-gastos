@@ -1,55 +1,50 @@
+import { app } from './config.js';
 import { 
     getAuth, 
-    signInWithPopup, 
-    signInWithRedirect, 
     GoogleAuthProvider, 
+    signInWithPopup, 
     onAuthStateChanged, 
-    signOut,
-    getRedirectResult 
+    signOut 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { app } from "./firebase-config.js";
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Configuración para Brave y navegadores con bloqueos
-provider.setCustomParameters({ prompt: 'select_account' });
+const ALLOWED_EMAILS = [
+    'rob.dor.80@gmail.com',
+    'fati.diez.82@gmail.com'
+];
 
 export const AuthService = {
     async login() {
         try {
-            // Intentamos primero Popup (es mejor UX para Chrome/Desktop)
-            await signInWithPopup(auth, provider);
-        } catch (error) {
-            // Si el navegador bloquea el popup (como Brave o móviles), usamos Redirect
-            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                console.log("Popup bloqueado, redirigiendo...");
-                signInWithRedirect(auth, provider);
-            } else {
-                console.error("Error en login:", error);
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            if (!ALLOWED_EMAILS.includes(user.email)) {
+                alert("Acceso denegado: Usuario no autorizado.");
+                await signOut(auth);
+                return null;
             }
+            return user;
+        } catch (error) {
+            console.error("Error en la autenticación:", error);
+            throw error;
         }
     },
 
-    logout() {
-        signOut(auth).then(() => {
-            window.location.reload();
+    initAuthObserver(callback) {
+        onAuthStateChanged(auth, (user) => {
+            if (user && ALLOWED_EMAILS.includes(user.email)) {
+                callback(user);
+            } else {
+                callback(null);
+            }
         });
     },
 
-    initAuthObserver(callback) {
-        // 1. Escuchar el resultado de un posible redirect previo (Caso Brave)
-        getRedirectResult(auth)
-            .then((result) => {
-                if (result?.user) {
-                    callback(result.user);
-                }
-            })
-            .catch((error) => console.error("Error en resultado de redirección:", error));
-
-        // 2. Escuchar cambios de estado normales (Caso Chrome / Sesión persistente)
-        onAuthStateChanged(auth, (user) => {
-            callback(user);
-        });
+    async logout() {
+        await signOut(auth);
+        window.location.reload();
     }
 };
