@@ -1,0 +1,130 @@
+/* =========================================================
+   PANTALLA DE BIENVENIDA (ESTADO BASE / PC)
+   ========================================================= */
+#login-section {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+    text-align: center;
+    padding: 60px 20px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.welcome-header { width: 100%; }
+
+.welcome-title {
+    font-size: 3.5rem;
+    color: #ffffff;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+}
+
+.welcome-subtitle {
+    color: #f0f0f0;
+    margin-top: 10px;
+    font-size: 1.2rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+#btn-login {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+#btn-login:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
+#btn-login img { filter: brightness(0) invert(1); }
+
+/* =========================================================
+   SECCIONES DE SEGURIDAD (TRANSICIÓN Y PIN)
+   ========================================================= */
+#transition-section, #pin-section {
+    height: 100vh;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 45px; height: 45px;
+    border: 5px solid #f3f3f3; border-top: 5px solid #3498db;
+    border-radius: 50%; animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* =========================================================
+   DASHBOARD Y TARJETAS
+   ========================================================= */
+.dashboard-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 20px; 
+    margin: 20px; 
+}
+
+.card { 
+    position: relative; border-radius: 18px; padding: 20px; 
+    display: flex; flex-direction: column; justify-content: space-between; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); 
+}
+.card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
+.card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
+.card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
+.bank-logo { position: absolute; top: 15px; right: 15px; height: 28px; }
+.balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50; }
+
+.hidden { display: none !important; }
+
+/* =========================================================
+   TABLET (Galaxy Tab S9+): portrait => móvil / landscape => PC
+   ========================================================= */
+
+/* --- 1) PORTRAIT: tratar como móvil --- */
+@media (orientation: portrait) and (max-width: 900px) {
+  #login-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                url('../assets/images/mellon.png') no-repeat center center;
+    background-size: contain;
+    background-position: center;
+  }
+  .pc-nav-bar { display: none !important; }
+  .menu-burguer-container { display: flex !important; }
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    margin: 12px !important; gap: 14px !important;
+  }
+  .card { height: auto !important; min-height: 120px; }
+  .balance { font-size: 1.9rem !important; }
+  .welcome-title { font-size: 3rem; }
+}
+
+/* --- 2) LANDSCAPE: tratar como PC/desktop --- */
+@media (orientation: landscape) and (min-width: 1000px) {
+  #login-section { background: #1a1a1a !important; }
+  .pc-nav-bar { display: block !important; }
+  .menu-burguer-container { display: none !important; }
+  #side-menu { display: none !important; }
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    max-width: 1200px; margin: 24px auto !important; gap: 22px !important;
+  }
+  .balance { font-size: 2.2rem !important; }
+}
