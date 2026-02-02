@@ -1,5 +1,6 @@
 import { 
     getAuth, 
+    signInWithPopup, 
     signInWithRedirect, 
     GoogleAuthProvider, 
     onAuthStateChanged, 
@@ -11,10 +12,23 @@ import { app } from "./firebase-config.js";
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+// Configuración para Brave y navegadores con bloqueos
+provider.setCustomParameters({ prompt: 'select_account' });
+
 export const AuthService = {
-    // Cambiamos a Redirect para máxima compatibilidad (Brave, Safari, Chrome móvil)
-    login() {
-        signInWithRedirect(auth, provider);
+    async login() {
+        try {
+            // Intentamos primero Popup (es mejor UX para Chrome/Desktop)
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            // Si el navegador bloquea el popup (como Brave o móviles), usamos Redirect
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                console.log("Popup bloqueado, redirigiendo...");
+                signInWithRedirect(auth, provider);
+            } else {
+                console.error("Error en login:", error);
+            }
+        }
     },
 
     logout() {
@@ -24,17 +38,18 @@ export const AuthService = {
     },
 
     initAuthObserver(callback) {
-        // Primero verificamos si venimos de un redireccionamiento exitoso
+        // 1. Escuchar el resultado de un posible redirect previo (Caso Brave)
         getRedirectResult(auth)
-            .then(() => {
-                onAuthStateChanged(auth, (user) => {
-                    callback(user);
-                });
+            .then((result) => {
+                if (result?.user) {
+                    callback(result.user);
+                }
             })
-            .catch((error) => {
-                console.error("Error en el redirect de Google:", error);
-                // Si falla, intentamos el observador normal por si ya hay sesión
-                onAuthStateChanged(auth, (user) => callback(user));
-            });
+            .catch((error) => console.error("Error en resultado de redirección:", error));
+
+        // 2. Escuchar cambios de estado normales (Caso Chrome / Sesión persistente)
+        onAuthStateChanged(auth, (user) => {
+            callback(user);
+        });
     }
 };
