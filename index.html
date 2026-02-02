@@ -7,79 +7,100 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
-        /* Estilos específicos para las tarjetas con logos y colores suaves */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            position: relative;
-            height: 140px;
-            border-radius: 18px;
-            padding: 20px;
+        /* Estética de la Pantalla de Bienvenida */
+        #login-section {
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            border: 1px solid rgba(0,0,0,0.05); /* Borde sutil */
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            text-align: center;
+            padding: 20px;
         }
 
-        .card:active { transform: scale(0.98); }
-
-        /* Logos en la esquina [cite: 42] */
-        .bank-logo {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            height: 28px;
-            width: auto;
-            opacity: 0.9;
+        .welcome-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
         }
 
-        /* FONDOS SUAVES (Pastel) [cite: 43] */
+        .welcome-subtitle {
+            color: #5d6d7e;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        #btn-login {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: white;
+            color: #444;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #btn-login:active { transform: scale(0.95); }
+
+        /* Pantalla de Transición */
+        #transition-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Re-ajuste de tarjetas para que se vean bien */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px; }
+        .card { position: relative; height: 140px; border-radius: 18px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
         .card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
         .card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
         .card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
-
-        .bank-label { 
-            font-size: 0.85rem; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            opacity: 0.8;
-        }
-        
-        .balance { 
-            font-size: 2.2rem; 
-            font-weight: 800; 
-            margin-top: 5px;
-            color: #2c3e50; /* Texto oscuro para máxima legibilidad [cite: 44] */
-        }
+        .bank-logo { position: absolute; top: 15px; right: 15px; height: 28px; }
+        .balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div id="app-container">
-        <header class="app-header">
-            <div class="menu-burguer-container" id="menu-open">
-                <div class="menu-burguer"><span></span><span></span><span></span></div>
-            </div>
-            <div class="logo-period"><span id="current-period-display">Cargando...</span></div>
-            <div id="user-display"></div>
-        </header>
-
+        
         <section id="login-section">
-            <h1 style="font-size: 2rem; margin-top: 50px; text-align:center;">Finanzas Familiares</h1>
-            <div style="text-align:center;">
-                <button id="btn-login" style="padding: 15px 30px; background:#4285F4; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">
-                    Entrar con Google
-                </button>
-            </div>
+            <h1 class="welcome-title">Gatos Mes</h1>
+            <p class="welcome-subtitle">Control financiero familiar seguro</p>
+            <button id="btn-login">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                Entrar con Google
+            </button>
+        </section>
+
+        <section id="transition-section" class="hidden">
+            <div class="spinner"></div>
+            <h2 style="color: #2c3e50; margin-bottom: 8px;">Verificando seguridad...</h2>
+            <p style="color: #7f8c8d;">Protegiendo tus datos</p>
         </section>
 
         <section id="pin-section" class="hidden">
@@ -100,6 +121,14 @@
         </section>
 
         <section id="app-section" class="hidden">
+            <header class="app-header">
+                <div class="menu-burguer-container" id="menu-open">
+                    <div class="menu-burguer"><span></span><span></span><span></span></div>
+                </div>
+                <div class="logo-period"><span id="current-period-display">Cargando...</span></div>
+                <div id="user-display"></div>
+            </header>
+
             <nav class="pc-nav-bar">
                 <ul>
                     <li id="pc-add-expense">✏️ Gasto</li>
@@ -129,7 +158,7 @@
                     </div>
                 </div>
                 <div id="dynamic-content">
-                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú para empezar.</p>
+                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú.</p>
                 </div>
             </main>
 
@@ -162,20 +191,15 @@
         const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
         let cacheMovements = [];
 
-        // Botones
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
-        
         document.getElementById('pc-add-expense').onclick = () => ExpenseForm.render();
         document.getElementById('mob-add-expense').onclick = () => { ExpenseForm.render(); document.getElementById('side-menu').classList.add('hidden'); };
-        
         document.getElementById('pc-add-income').onclick = () => IncomeForm.render(false);
         document.getElementById('mob-add-income').onclick = () => { IncomeForm.render(false); document.getElementById('side-menu').classList.add('hidden'); };
-        
         document.getElementById('pc-add-salary').onclick = () => IncomeForm.render(true);
         document.getElementById('mob-add-salary').onclick = () => { IncomeForm.render(true); document.getElementById('side-menu').classList.add('hidden'); };
-        
         document.getElementById('pc-history').onclick = () => HistoryView.render(cacheMovements);
         document.getElementById('mob-history').onclick = () => { HistoryView.render(cacheMovements); document.getElementById('side-menu').classList.add('hidden'); };
         
@@ -183,7 +207,6 @@
         document.getElementById('menu-open').onclick = () => sideMenu.classList.remove('hidden');
         document.getElementById('menu-close').onclick = () => sideMenu.classList.add('hidden');
 
-        // Lógica de cálculo y renderizado de saldos [cite: 41, 76]
         const mostrarSaldosActuales = (movements = []) => {
             cacheMovements = movements;
             let sBBVA = parseFloat(InitialBalances.bbva);
@@ -192,39 +215,29 @@
             const displayMes = document.getElementById('current-period-display');
 
             if (movements.length > 0) {
-                // Nombre del mes basado en la última nómina [cite: 93]
                 const nominas = movements.filter(m => m.type === 'salary');
                 if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
-
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
-                    const isPension = m.category === "Plan de Pensiones" || m.subcategory === "Plan de Pensiones";
-
                     if (m.type === 'expense') {
                         if (m.account === 'bbva') sBBVA -= cant; else sING -= cant;
-                        if (isPension) sPension += cant;
+                        if (m.category === "Plan de Pensiones") sPension += cant;
                     } else if (m.type === 'income' || m.type === 'salary') {
                         if (m.account === 'bbva') sBBVA += cant; else sING += cant;
-                    } else if (m.type === 'transfer') { // Lógica de traspasos [cite: 67, 68]
+                    } else if (m.type === 'transfer') {
                         if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
                         else { sING -= cant; sBBVA += cant; }
                     }
                 });
-            } else {
-                displayMes.innerText = "Febrero 2026";
             }
-
             document.getElementById('saldo-bbva').innerText = f.format(sBBVA);
             document.getElementById('saldo-ing').innerText = f.format(sING);
             document.getElementById('saldo-pension').innerText = f.format(sPension);
         };
 
-        // INICIO DE LA APP: Delegamos la carga de datos al AuthGuard tras el PIN
         try {
             AuthGuard.verifyAccess(mostrarSaldosActuales);
-        } catch (error) { 
-            console.error("Error crítico de inicio:", error); 
-        }
+        } catch (error) { console.error(error); }
     </script>
 </body>
 </html>
