@@ -3,34 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Web Gastos - Nivel 3</title>
+    <title>Gatos Mes - Seguridad Nivel 3</title>
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
-        /* Estética de la Pantalla de Bienvenida */
+        /* PANTALLA DE BIENVENIDA CON IMAGEN DE FONDO */
         #login-section {
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            /* Aplicamos tu imagen mellon.png */
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                        url('/assets/images/mellon.png') no-repeat center center;
+            background-size: cover;
             text-align: center;
             padding: 20px;
         }
 
         .welcome-title {
-            font-size: 2.5rem;
-            color: #2c3e50;
+            font-size: 3rem;
+            color: #ffffff; /* Blanco para resaltar sobre el fondo */
             font-weight: 800;
             margin-bottom: 10px;
             letter-spacing: -1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         .welcome-subtitle {
-            color: #5d6d7e;
+            color: #e0e0e0;
             margin-bottom: 40px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 400;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
         }
 
         #btn-login {
@@ -41,31 +47,32 @@
             background: white;
             color: #444;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 1.1rem;
             font-weight: 600;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         #btn-login:active { transform: scale(0.95); }
 
-        /* Pantalla de Transición */
-        #transition-section {
+        /* SECCIONES POSTERIORES (Sin imagen de fondo para claridad) */
+        #transition-section, #pin-section {
             height: 100vh;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #ffffff;
         }
 
+        /* Spinner para la transición */
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            width: 45px;
+            height: 45px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
@@ -73,14 +80,30 @@
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Re-ajuste de tarjetas para que se vean bien */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px; }
-        .card { position: relative; height: 140px; border-radius: 18px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
+        /* Estilos de Tarjetas del Dashboard */
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+            margin: 20px; 
+        }
+        .card { 
+            position: relative; 
+            height: 140px; 
+            border-radius: 18px; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(0,0,0,0.05); 
+        }
         .card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
         .card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
         .card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
         .bank-logo { position: absolute; top: 15px; right: 15px; height: 28px; }
         .balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50; }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -89,11 +112,11 @@
     <div id="app-container">
         
         <section id="login-section">
-            <h1 class="welcome-title">Gatos Mes</h1>
+            <h1 class="welcome-title">Gastos Mes</h1>
             <p class="welcome-subtitle">Control financiero familiar seguro</p>
             <button id="btn-login">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                Entrar con Google
+                Mellon
             </button>
         </section>
 
@@ -104,8 +127,8 @@
         </section>
 
         <section id="pin-section" class="hidden">
-            <div style="text-align: center; padding-top: 50px;">
-                <h2>PIN de Seguridad</h2>
+            <div style="text-align: center;">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">PIN de Seguridad</h2>
                 <div class="pin-dots" style="display:flex; justify-content:center; gap:15px; margin:30px 0;">
                     <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
                 </div>
@@ -158,7 +181,7 @@
                     </div>
                 </div>
                 <div id="dynamic-content">
-                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción del menú.</p>
+                    <p style="text-align:center; color:#666; margin-top:40px;">Selecciona una opción para empezar.</p>
                 </div>
             </main>
 
@@ -168,11 +191,11 @@
                         <h3>Menú</h3><button id="menu-close" style="background:none; border:none; font-size:1.8rem;">✕</button>
                     </div>
                     <nav>
-                        <div class="nav-item" id="mob-add-expense">✏️ Añadir Gasto</div>
-                        <div class="nav-item" id="mob-add-income">💰 Añadir Ingreso</div>
-                        <div class="nav-item" id="mob-add-salary">🏦 Registrar Nómina</div>
+                        <div class="nav-item" id="mob-add-expense">✏️ Gasto</div>
+                        <div class="nav-item" id="mob-add-income">💰 Ingreso</div>
+                        <div class="nav-item" id="mob-add-salary">🏦 Nómina</div>
                         <div class="nav-item" id="mob-history">📋 Historial</div>
-                        <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Cerrar Sesión</div>
+                        <div class="nav-item" id="mob-logout" style="color: #d32f2f; margin-top:20px;">🚪 Salir</div>
                     </nav>
                 </div>
             </aside>
@@ -191,15 +214,20 @@
         const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
         let cacheMovements = [];
 
+        // Asignación de eventos
         document.getElementById('btn-login').onclick = () => AuthService.login();
         document.getElementById('pc-logout').onclick = () => AuthService.logout();
         document.getElementById('mob-logout').onclick = () => AuthService.logout();
+        
         document.getElementById('pc-add-expense').onclick = () => ExpenseForm.render();
         document.getElementById('mob-add-expense').onclick = () => { ExpenseForm.render(); document.getElementById('side-menu').classList.add('hidden'); };
+        
         document.getElementById('pc-add-income').onclick = () => IncomeForm.render(false);
         document.getElementById('mob-add-income').onclick = () => { IncomeForm.render(false); document.getElementById('side-menu').classList.add('hidden'); };
+        
         document.getElementById('pc-add-salary').onclick = () => IncomeForm.render(true);
         document.getElementById('mob-add-salary').onclick = () => { IncomeForm.render(true); document.getElementById('side-menu').classList.add('hidden'); };
+        
         document.getElementById('pc-history').onclick = () => HistoryView.render(cacheMovements);
         document.getElementById('mob-history').onclick = () => { HistoryView.render(cacheMovements); document.getElementById('side-menu').classList.add('hidden'); };
         
@@ -217,6 +245,7 @@
             if (movements.length > 0) {
                 const nominas = movements.filter(m => m.type === 'salary');
                 if (nominas.length > 0) displayMes.innerText = nominas[nominas.length - 1].note || "Periodo Activo";
+                
                 movements.forEach(m => {
                     const cant = parseFloat(m.amount);
                     if (m.type === 'expense') {
@@ -235,9 +264,10 @@
             document.getElementById('saldo-pension').innerText = f.format(sPension);
         };
 
+        // Inicio verificado tras PIN
         try {
             AuthGuard.verifyAccess(mostrarSaldosActuales);
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error("Error de acceso:", error); }
     </script>
 </body>
 </html>
