@@ -14,7 +14,7 @@ html, body {
 /* FONDO GLOBAL (PC) */
 body {
     background-image: 
-        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0,0.4)),
+        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
         url('../assets/images/mellon_pc.png');
     background-repeat: no-repeat;
     background-position: center center;
