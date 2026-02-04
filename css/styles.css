@@ -1,5 +1,5 @@
 /* =========================================================
-   PANTALLA DE BIENVENIDA (ESTADO BASE / PC)
+   PANTALLA DE BIENVENIDA (ESTADO BASE / PC & LANDSCAPE)
    ========================================================= */
 #login-section {
     height: 100vh;
@@ -7,7 +7,10 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    background-color: #1a1a1a;
+    /* Imagen para PC y Tablet Horizontal */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('../assets/images/mellon_pc.png') no-repeat center center;
+    background-size: cover;
     text-align: center;
     padding: 60px 20px;
     overflow: hidden;
@@ -85,11 +88,11 @@
     display: flex; flex-direction: column; justify-content: space-between; 
     box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); 
 }
-.card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
-.card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
-.card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
+.card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; } 
+.card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; } 
+.card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; } 
 .bank-logo { position: absolute; top: 15px; right: 15px; height: 28px; }
-.balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50; }
+.balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50;}
 
 .hidden { display: none !important; }
 
@@ -118,7 +121,6 @@
 
 /* --- 2) LANDSCAPE: tratar como PC/desktop --- */
 @media (orientation: landscape) and (min-width: 1000px) {
-  #login-section { background: #1a1a1a !important; }
   .pc-nav-bar { display: block !important; }
   .menu-burguer-container { display: none !important; }
   #side-menu { display: none !important; }
