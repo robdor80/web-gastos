@@ -1,22 +1,38 @@
-/* =========================================================
-   PANTALLA DE BIENVENIDA (ESTADO BASE / PC & LANDSCAPE)
-   ========================================================= */
+/* RESET TOTAL */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* PANTALLA DE BIENVENIDA (PC & LANDSCAPE) */
 #login-section {
+    position: relative;
     height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    /* Imagen centrada y cubriendo todo el espacio */
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-                url('../assets/images/mellon_pc.png') no-repeat center center;
-    background-size: cover; 
-    background-position: center center; /* Fuerza el centrado absoluto */
+    
+    /* Imagen centrada y fija */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                      url('../assets/images/mellon_pc.png');
+    background-repeat: no-repeat;
+    background-position: center center !important;
+    background-size: cover;
+    background-attachment: fixed;
+    
     text-align: center;
     padding: 60px 20px;
-    margin: 0;
-    overflow: hidden;
     box-sizing: border-box;
 }
 
@@ -57,45 +73,16 @@
     z-index: 2;
 }
 
-#btn-login:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
-#btn-login img { filter: brightness(0) invert(1); }
-
-/* =========================================================
-   TABLET (Galaxy Tab S9+): portrait => móvil / landscape => PC
-   ========================================================= */
-
-/* --- 1) PORTRAIT: tratar como móvil --- */
-@media (orientation: portrait) and (max-width: 900px) {
-  #login-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-                url('../assets/images/mellon.png') no-repeat center center;
-    background-size: cover; 
-    background-position: center center; /* Centrado también en móvil */
-  }
-  .pc-nav-bar { display: none !important; }
-  .menu-burguer-container { display: flex !important; }
-  .dashboard-grid {
-    grid-template-columns: 1fr !important;
-    margin: 12px !important; gap: 14px !important;
-  }
-  .card { height: auto !important; min-height: 120px; }
-  .balance { font-size: 1.9rem !important; }
-  .welcome-title { font-size: 3rem; }
+#btn-login:active { 
+    transform: scale(0.95); 
+    background: rgba(255, 255, 255, 0.1); 
 }
 
-/* --- 2) LANDSCAPE: tratar como PC/desktop --- */
-@media (orientation: landscape) and (min-width: 1000px) {
-  .pc-nav-bar { display: block !important; }
-  .menu-burguer-container { display: none !important; }
-  #side-menu { display: none !important; }
-  .dashboard-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    max-width: 1200px; margin: 24px auto !important; gap: 22px !important;
-  }
-  .balance { font-size: 2.2rem !important; }
+#btn-login img { 
+    filter: brightness(0) invert(1); 
 }
 
-/* SECCIONES DE SEGURIDAD */
+/* SEGURIDAD Y CARGA */
 #transition-section, #pin-section {
     height: 100vh;
     background: #ffffff;
@@ -106,12 +93,19 @@
 }
 
 .spinner {
-    width: 45px; height: 45px;
-    border: 5px solid #f3f3f3; border-top: 5px solid #3498db;
-    border-radius: 50%; animation: spin 1s linear infinite;
+    width: 45px; 
+    height: 45px;
+    border: 5px solid #f3f3f3; 
+    border-top: 5px solid #3498db;
+    border-radius: 50%; 
+    animation: spin 1s linear infinite;
     margin-bottom: 20px;
 }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
 
 /* DASHBOARD */
 .dashboard-grid { 
@@ -122,10 +116,16 @@
 }
 
 .card { 
-    position: relative; border-radius: 18px; padding: 20px; 
-    display: flex; flex-direction: column; justify-content: space-between; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);
+    position: relative; 
+    border-radius: 18px; 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+    border: 1px solid rgba(0,0,0,0.05);
 }
+
 .card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
 .card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
 .card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
@@ -133,3 +133,37 @@
 .balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50; }
 
 .hidden { display: none !important; }
+
+/* TABLET & MOBILE (PORTRAIT) */
+@media (orientation: portrait) and (max-width: 900px) {
+  #login-section {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                      url('../assets/images/mellon.png');
+    background-size: cover; 
+    background-position: center center !important;
+    background-attachment: scroll;
+  }
+  .pc-nav-bar { display: none !important; }
+  .menu-burguer-container { display: flex !important; }
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    margin: 12px !important; 
+    gap: 14px !important;
+  }
+  .card { height: auto !important; min-height: 120px; }
+  .balance { font-size: 1.9rem !important; }
+  .welcome-title { font-size: 3rem; }
+}
+
+/* TABLET (LANDSCAPE) */
+@media (orientation: landscape) and (min-width: 1000px) {
+  .pc-nav-bar { display: block !important; }
+  .menu-burguer-container { display: none !important; }
+  #side-menu { display: none !important; }
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    max-width: 1200px; 
+    margin: 24px auto !important; 
+    gap: 22px !important;
+  }
+}
