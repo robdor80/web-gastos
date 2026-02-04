@@ -17,19 +17,18 @@ html, body {
 #login-section {
     position: relative;
     height: 100vh;
-    width: 100vw;
+    width: 100%; /* <-- ARREGLADO */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
     
-    /* Imagen centrada y fija */
     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
                       url('../assets/images/mellon_pc.png');
     background-repeat: no-repeat;
-    background-position: center center !important;
+    background-position: center center;
     background-size: cover;
-    /*background-attachment: fixed;*/
+    background-attachment: fixed;
     
     text-align: center;
     padding: 60px 20px;
@@ -129,10 +128,23 @@ html, body {
 .card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
 .card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
 .card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
-.bank-logo { position: absolute; top: 15px; right: 15px; height: 28px; }
-.balance { font-size: 2.2rem; font-weight: 800; color: #2c3e50; }
 
-.hidden { display: none !important; }
+.bank-logo { 
+    position: absolute; 
+    top: 15px; 
+    right: 15px; 
+    height: 28px; 
+}
+
+.balance { 
+    font-size: 2.2rem; 
+    font-weight: 800; 
+    color: #2c3e50; 
+}
+
+.hidden { 
+    display: none !important; 
+}
 
 /* TABLET & MOBILE (PORTRAIT) */
 @media (orientation: portrait) and (max-width: 900px) {
@@ -140,16 +152,19 @@ html, body {
     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
                       url('../assets/images/mellon.png');
     background-size: cover; 
-    background-position: center center !important;
+    background-position: center center;
     background-attachment: scroll;
   }
+
   .pc-nav-bar { display: none !important; }
   .menu-burguer-container { display: flex !important; }
+
   .dashboard-grid {
     grid-template-columns: 1fr !important;
     margin: 12px !important; 
     gap: 14px !important;
   }
+
   .card { height: auto !important; min-height: 120px; }
   .balance { font-size: 1.9rem !important; }
   .welcome-title { font-size: 3rem; }
@@ -160,6 +175,7 @@ html, body {
   .pc-nav-bar { display: block !important; }
   .menu-burguer-container { display: none !important; }
   #side-menu { display: none !important; }
+
   .dashboard-grid {
     grid-template-columns: repeat(3, 1fr) !important;
     max-width: 1200px; 
