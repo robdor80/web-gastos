@@ -1,68 +1,78 @@
-import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    query, 
+    where, 
+    onSnapshot, 
+    orderBy, 
+    doc, 
+    deleteDoc 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const db = getFirestore();
-const auth = getAuth();
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { app } from './config.js'; // Importamos la app inicializada
+
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 export const DbService = {
     
     /**
-     * Guarda cualquier tipo de movimiento (gasto, ingreso, nómina o alerta/pending)
+     * Guarda movimientos (Gastos, Ingresos, Alertas/Pending)
      */
     addMovement: async (movementData) => {
         const user = auth.currentUser;
-        if (!user) throw new Error("Usuario no autenticado");
+        if (!user) {
+            alert("Error: No estás logueado en Firebase.");
+            throw new Error("Usuario no autenticado");
+        }
 
         try {
-            // Añadimos el UID del usuario y la fecha de creación del registro
             const docRef = await addDoc(collection(db, "movements"), {
                 ...movementData,
                 uid: user.uid,
                 createdAt: new Date().toISOString()
             });
-            console.log("Movimiento guardado con ID: ", docRef.id);
+            console.log("Guardado con ID:", docRef.id);
             return docRef.id;
         } catch (e) {
-            console.error("Error añadiendo documento: ", e);
+            console.error("Error guardando:", e);
             throw e;
         }
     },
 
     /**
-     * Borra un movimiento por su ID
+     * Borra un movimiento
      */
     deleteMovement: async (id) => {
         try {
             await deleteDoc(doc(db, "movements", id));
-            console.log("Documento borrado:", id);
+            console.log("Borrado:", id);
         } catch (e) {
-            console.error("Error borrando documento: ", e);
+            console.error("Error borrando:", e);
             throw e;
         }
     },
 
     /**
-     * Escucha los movimientos en tiempo real para un mes/año específico
-     * (O trae todos si no filtramos por fecha, aquí traemos todos los del usuario)
+     * Escucha los movimientos del usuario
      */
     getMovements: (callback) => {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Consulta: movimientos del usuario ordenados por fecha
         const q = query(
             collection(db, "movements"), 
             where("uid", "==", user.uid),
-            orderBy("date", "desc") // Ordenamos por la fecha del movimiento
+            orderBy("date", "desc")
         );
 
-        // Escuchador en tiempo real (Snapshot)
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             const movements = [];
-            querySnapshot.forEach((doc) => {
+            snapshot.forEach((doc) => {
                 movements.push({ id: doc.id, ...doc.data() });
             });
-            // Devolvemos los datos al callback (que es quien actualiza la pantalla)
             callback(movements);
         });
 
