@@ -5,28 +5,22 @@ import {
     query, 
     where, 
     onSnapshot, 
-    orderBy, 
     doc, 
     deleteDoc 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { app } from './config.js'; // Importamos la app inicializada
+import { app } from './config.js'; 
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 export const DbService = {
     
-    /**
-     * Guarda movimientos (Gastos, Ingresos, Alertas/Pending)
-     */
+    // Guardar
     addMovement: async (movementData) => {
         const user = auth.currentUser;
-        if (!user) {
-            alert("Error: No estás logueado en Firebase.");
-            throw new Error("Usuario no autenticado");
-        }
+        if (!user) throw new Error("No user");
 
         try {
             const docRef = await addDoc(collection(db, "movements"), {
@@ -34,38 +28,32 @@ export const DbService = {
                 uid: user.uid,
                 createdAt: new Date().toISOString()
             });
-            console.log("Guardado con ID:", docRef.id);
             return docRef.id;
         } catch (e) {
-            console.error("Error guardando:", e);
+            console.error(e);
             throw e;
         }
     },
 
-    /**
-     * Borra un movimiento
-     */
+    // Borrar
     deleteMovement: async (id) => {
         try {
             await deleteDoc(doc(db, "movements", id));
-            console.log("Borrado:", id);
         } catch (e) {
-            console.error("Error borrando:", e);
+            console.error(e);
             throw e;
         }
     },
 
-    /**
-     * Escucha los movimientos del usuario
-     */
+    // Obtener datos (CORREGIDO)
     getMovements: (callback) => {
         const user = auth.currentUser;
         if (!user) return;
 
+        // 1. Pedimos los datos SIN ordenar para evitar error de índice
         const q = query(
             collection(db, "movements"), 
-            where("uid", "==", user.uid),
-            orderBy("date", "desc")
+            where("uid", "==", user.uid)
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -73,6 +61,15 @@ export const DbService = {
             snapshot.forEach((doc) => {
                 movements.push({ id: doc.id, ...doc.data() });
             });
+
+            // 2. Ordenamos aquí en JavaScript (más robusto)
+            // Orden descendente (más nuevo primero)
+            movements.sort((a, b) => {
+                const dateA = new Date(a.date || a.createdAt || 0);
+                const dateB = new Date(b.date || b.createdAt || 0);
+                return dateB - dateA;
+            });
+
             callback(movements);
         });
 
