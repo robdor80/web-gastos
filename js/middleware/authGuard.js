@@ -5,28 +5,30 @@ import { HistoryView } from '../components/historyView.js';
 
 export const AuthGuard = {
     timer: null,
-    inactivityLimit: 180000,
+    inactivityLimit: 180000, // 3 minutos
 
     verifyAccess(onSuccessCallback) {
+        // Ahora sí existe esta función en auth.js
         AuthService.initAuthObserver((user) => {
             const loginSection = document.getElementById('login-section');
             const transitionSection = document.getElementById('transition-section');
             const appSection = document.getElementById('app-section');
 
             if (user) {
-                // 1. Ocultar login
+                // 1. Usuario detectado: Ocultar login
                 loginSection.classList.add('hidden');
                 
-                // 2. Mostrar transición (Verificando seguridad)
+                // 2. Mostrar transición
                 transitionSection.classList.remove('hidden');
                 
-                // 3. Pequeño delay para UX profesional según Roadmap
+                // 3. Esperar un poco y pedir PIN
                 setTimeout(() => {
                     transitionSection.classList.add('hidden');
                     this.showPinScreen(onSuccessCallback);
                 }, 1500); 
 
             } else {
+                // No hay usuario: Mostrar login
                 loginSection.classList.remove('hidden');
                 document.getElementById('pin-section').classList.add('hidden');
                 appSection.classList.add('hidden');
@@ -44,13 +46,19 @@ export const AuthGuard = {
         appSection.classList.add('hidden');
 
         PinPad.init(() => {
+            // PIN Correcto
             pinSection.classList.add('hidden');
             appSection.classList.remove('hidden');
             
-            DbService.subscribeToBalances((movements) => {
+            // CORRECCIÓN AQUÍ: Usamos getMovements que es lo que tiene tu db.js
+            DbService.getMovements((movements) => {
                 if (onSuccessCallback) onSuccessCallback(movements);
-                const historyContainer = document.getElementById('history-list-container');
-                if (historyContainer) HistoryView.filterAndShow(movements);
+                
+                // Actualizar historial si existe el contenedor
+                /* Si tienes el componente HistoryView listo, descomenta esto:
+                if (typeof HistoryView !== 'undefined' && HistoryView.filterAndShow) {
+                     HistoryView.filterAndShow(movements);
+                } */
             });
 
             this.startInactivityTimer();
@@ -70,7 +78,10 @@ export const AuthGuard = {
 
     resetTimer() {
         if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(() => this.showPinScreen(), this.inactivityLimit);
+        this.timer = setTimeout(() => {
+            console.log("Tiempo de inactividad excedido, bloqueando...");
+            window.location.reload(); // Recarga para pedir PIN o Login de nuevo
+        }, this.inactivityLimit);
     },
 
     stopInactivityTimer() {

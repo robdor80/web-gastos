@@ -1,16 +1,15 @@
-// IMPORTANTE: Ruta ./config.js porque están en la misma carpeta
 import { app } from './config.js'; 
 import { 
     getAuth, 
     GoogleAuthProvider, 
     signInWithPopup, 
-    signOut 
+    signOut,
+    onAuthStateChanged // <--- IMPORTANTE: Faltaba esto
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Tu lista blanca de seguridad
 const ALLOWED_EMAILS = [
     'rob.dor.80@gmail.com',
     'fati.diez.82@gmail.com'
@@ -18,41 +17,48 @@ const ALLOWED_EMAILS = [
 
 export const AuthService = {
     /**
-     * Iniciar sesión con validación de email
+     * Iniciar sesión (Acción del botón)
      */
     async login() {
         try {
-            console.log("Intentando login con Google...");
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            // Verificamos si el email está en la lista permitida
-            if (!ALLOWED_EMAILS.includes(user.email)) {
-                alert("⛔ Acceso denegado: Tu email no está autorizado.");
-                await signOut(auth); 
-                return null;
-            }
-
-            console.log("Usuario autorizado:", user.email);
-            // El AuthGuard detectará el cambio automáticamente, no hace falta reload
-            return user;
-
+            console.log("Abriendo popup de Google...");
+            await signInWithPopup(auth, provider);
+            // No necesitamos hacer nada más aquí, el "Observer" de abajo se encargará del resto
         } catch (error) {
-            console.error("Error en la autenticación:", error);
-            alert("Error al conectar con Google. Mira la consola (F12).");
-            throw error;
+            console.error("Error Auth:", error);
+            alert("Error al conectar con Google.");
         }
+    },
+
+    /**
+     * ESCUCHADOR DE ESTADO (ESTO ES LO QUE FALTABA)
+     * Esta función avisa a la app cuando el usuario entra o sale.
+     */
+    initAuthObserver(callback) {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Si hay usuario, comprobamos si está autorizado
+                if (ALLOWED_EMAILS.includes(user.email)) {
+                    console.log("Usuario detectado y autorizado:", user.email);
+                    callback(user); // Avisamos al AuthGuard: "¡Adelante!"
+                } else {
+                    console.warn("Usuario no autorizado intentó entrar:", user.email);
+                    alert("⛔ Tu email no tiene permiso para acceder.");
+                    signOut(auth); // Lo echamos fuera
+                    callback(null);
+                }
+            } else {
+                console.log("No hay usuario logueado.");
+                callback(null); // Avisamos al AuthGuard: "Nadie en casa"
+            }
+        });
     },
 
     /**
      * Cerrar sesión
      */
     async logout() {
-        try {
-            await signOut(auth);
-            window.location.reload(); 
-        } catch (error) {
-            console.error("Error al salir:", error);
-        }
+        await signOut(auth);
+        window.location.reload();
     }
 };
