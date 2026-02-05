@@ -1,48 +1,71 @@
-/**
- * DB Service - Conexión con Firebase Firestore
- * Aquí se graban y leen los movimientos reales.
- */
-import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
-    query, 
-    orderBy, 
-    onSnapshot,
-    serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { app } from './config.js';
+import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-const db = getFirestore(app);
+const db = getFirestore();
+const auth = getAuth();
 
 export const DbService = {
-    // 1. Guardar un movimiento (Gasto, Ingreso o Traspaso)
-    async saveMovement(data) {
+    
+    /**
+     * Guarda cualquier tipo de movimiento (gasto, ingreso, nómina o alerta/pending)
+     */
+    addMovement: async (movementData) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Usuario no autenticado");
+
         try {
+            // Añadimos el UID del usuario y la fecha de creación del registro
             const docRef = await addDoc(collection(db, "movements"), {
-                ...data,
-                amount: parseFloat(data.amount),
-                timestamp: serverTimestamp()
+                ...movementData,
+                uid: user.uid,
+                createdAt: new Date().toISOString()
             });
             console.log("Movimiento guardado con ID: ", docRef.id);
-            return true;
+            return docRef.id;
         } catch (e) {
-            console.error("Error al guardar: ", e);
-            return false;
+            console.error("Error añadiendo documento: ", e);
+            throw e;
         }
     },
 
-    // 2. Escuchar cambios en tiempo real para actualizar el Dashboard
-    subscribeToBalances(callback) {
-        const q = query(collection(db, "movements"), orderBy("timestamp", "asc"));
-        
-        // Esta función se ejecuta CADA VEZ que alguien añade un gasto
-        return onSnapshot(q, (snapshot) => {
+    /**
+     * Borra un movimiento por su ID
+     */
+    deleteMovement: async (id) => {
+        try {
+            await deleteDoc(doc(db, "movements", id));
+            console.log("Documento borrado:", id);
+        } catch (e) {
+            console.error("Error borrando documento: ", e);
+            throw e;
+        }
+    },
+
+    /**
+     * Escucha los movimientos en tiempo real para un mes/año específico
+     * (O trae todos si no filtramos por fecha, aquí traemos todos los del usuario)
+     */
+    getMovements: (callback) => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Consulta: movimientos del usuario ordenados por fecha
+        const q = query(
+            collection(db, "movements"), 
+            where("uid", "==", user.uid),
+            orderBy("date", "desc") // Ordenamos por la fecha del movimiento
+        );
+
+        // Escuchador en tiempo real (Snapshot)
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const movements = [];
-            snapshot.forEach((doc) => {
-                movements.push(doc.data());
+            querySnapshot.forEach((doc) => {
+                movements.push({ id: doc.id, ...doc.data() });
             });
+            // Devolvemos los datos al callback (que es quien actualiza la pantalla)
             callback(movements);
         });
+
+        return unsubscribe;
     }
 };
