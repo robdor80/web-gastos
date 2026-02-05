@@ -1,15 +1,21 @@
 import { AuthService } from './firebase/auth.js';
 import { AuthGuard } from './middleware/authGuard.js';
 import { InitialBalances } from './config/initialBalances.js';
+import { ExpenseForm } from './components/expenseForm.js';
+import { IncomeForm } from './components/incomeForm.js';
+import { HistoryView } from './components/historyView.js';
+
+// Variable para guardar los movimientos y no tener que recargarlos al ver el historial
+let cacheMovements = [];
 
 /**
- * 1. DEFINIMOS LA FUNCIÓN PRIMERO
- * Para evitar el error "is not defined", la creamos antes de usarla.
+ * 1. FUNCIÓN PARA ACTUALIZAR SALDOS
  */
 const mostrarSaldosActuales = (movements = []) => {
-    console.log("Actualizando saldos..."); // Log para verificar que funciona
+    // Guardamos los datos en caché para usarlos en el Historial
+    cacheMovements = movements;
+
     const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
-    
     let sBBVA = parseFloat(InitialBalances.bbva || 0);
     let sING = parseFloat(InitialBalances.ing || 0);
     let sPension = parseFloat(InitialBalances.pension || 0);
@@ -22,56 +28,70 @@ const mostrarSaldosActuales = (movements = []) => {
                 if (m.category === "Plan de Pensiones") sPension += cant;
             } else if (m.type === 'income' || m.type === 'salary') {
                 if (m.account === 'bbva') sBBVA += cant; else sING += cant;
+            } else if (m.type === 'transfer') { // Por si implementas transferencias
+                if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
+                else { sING -= cant; sBBVA += cant; }
             }
         });
     }
 
-    // Actualización segura del DOM (verifica si existen los elementos antes de escribir)
-    const elBBVA = document.getElementById('saldo-bbva');
-    if (elBBVA) elBBVA.innerText = f.format(sBBVA);
+    // Actualizar DOM de forma segura
+    const updateText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    };
+
+    updateText('saldo-bbva', f.format(sBBVA));
+    updateText('saldo-ing', f.format(sING));
+    updateText('saldo-pension', f.format(sPension));
     
-    const elING = document.getElementById('saldo-ing');
-    if (elING) elING.innerText = f.format(sING);
-    
-    const elPen = document.getElementById('saldo-pension');
-    if (elPen) elPen.innerText = f.format(sPension);
+    // Actualizar también el periodo si hay nóminas
+    const nominas = movements.filter(m => m.type === 'salary');
+    if (nominas.length > 0) {
+        updateText('current-period-display', nominas[nominas.length - 1].note || "Periodo Activo");
+    }
 };
 
 /**
- * 2. ESPERAMOS A QUE EL DOM ESTÉ LISTO
- * Esto soluciona el error "Cannot set properties of null"
+ * 2. INICIALIZACIÓN Y EVENTOS
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Cargado. Inicializando eventos...");
+    console.log("Inicializando aplicación...");
 
-    // Asignación del Login con verificación
-    const btnLogin = document.getElementById('btn-login');
-    if (btnLogin) {
-        btnLogin.onclick = () => {
-            console.log("Click en Login detectado");
-            AuthService.login();
-        };
-    } else {
-        console.error("Error crítico: No se encuentra el botón con ID 'btn-login'");
-    }
+    // Función auxiliar para asignar clicks sin errores
+    const bindClick = (id, handler) => {
+        const el = document.getElementById(id);
+        if (el) el.onclick = handler;
+    };
 
-    // Asignación del Logout (PC)
-    const btnLogoutPc = document.getElementById('pc-logout');
-    if (btnLogoutPc) {
-        btnLogoutPc.onclick = () => AuthService.logout();
-    }
+    // --- LOGIN / LOGOUT ---
+    bindClick('btn-login', () => AuthService.login());
+    bindClick('pc-logout', () => AuthService.logout());
+    bindClick('mob-logout', () => AuthService.logout());
 
-    // Asignación del Logout (Móvil)
-    const btnLogoutMob = document.getElementById('mob-logout');
-    if (btnLogoutMob) {
-        btnLogoutMob.onclick = () => AuthService.logout();
-    }
+    // --- MENÚ LATERAL (Móvil) ---
+    const sideMenu = document.getElementById('side-menu');
+    const closeMenu = () => sideMenu?.classList.add('hidden');
+    
+    bindClick('menu-open', () => sideMenu?.classList.remove('hidden'));
+    bindClick('menu-close', closeMenu);
 
-    // 3. INICIAR SEGURIDAD
-    // Ahora 'mostrarSaldosActuales' ya existe, así que no dará error
+    // --- BOTONES PRINCIPALES (PC) ---
+    bindClick('pc-add-expense', () => ExpenseForm.render());
+    bindClick('pc-add-income', () => IncomeForm.render(false));
+    bindClick('pc-add-salary', () => IncomeForm.render(true));
+    bindClick('pc-history', () => HistoryView.render(cacheMovements));
+
+    // --- BOTONES PRINCIPALES (Móvil - cierran el menú al clicar) ---
+    bindClick('mob-add-expense', () => { ExpenseForm.render(); closeMenu(); });
+    bindClick('mob-add-income', () => { IncomeForm.render(false); closeMenu(); });
+    bindClick('mob-add-salary', () => { IncomeForm.render(true); closeMenu(); });
+    bindClick('mob-history', () => { HistoryView.render(cacheMovements); closeMenu(); });
+
+    // --- INICIO DE SEGURIDAD ---
     try {
         AuthGuard.verifyAccess(mostrarSaldosActuales);
     } catch (error) {
-        console.error("Error al verificar acceso:", error);
+        console.error("Error crítico en inicio:", error);
     }
 });
