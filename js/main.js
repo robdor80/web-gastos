@@ -20,28 +20,29 @@ const mostrarSaldosActuales = (movements = []) => {
     let sING = parseFloat(InitialBalances.ing || 0);
     let sPension = parseFloat(InitialBalances.pension || 0);
     
-    // Contadores para alertas
     let pendingCount = 0;
 
     if (movements && movements.length > 0) {
         movements.forEach(m => {
             const cant = parseFloat(m.amount);
             
-            // Si es alerta pendiente, solo contamos
+            // Si es alerta, solo contamos, NO afecta saldo
             if (m.type === 'pending') {
                 pendingCount++;
             } 
-            // Si es movimiento real, calculamos saldo
+            // Si es gasto
             else if (m.type === 'expense') {
                 if (m.account === 'bbva') sBBVA -= cant; else sING -= cant;
                 if (m.category === "Plan de Pensiones") sPension += cant;
-            } else if (m.type === 'income' || m.type === 'salary') {
+            } 
+            // Si es ingreso o nómina
+            else if (m.type === 'income' || m.type === 'salary') {
                 if (m.account === 'bbva') sBBVA += cant; else sING += cant;
             }
         });
     }
 
-    // Actualizar Textos de Saldos
+    // Actualizar Textos
     const setTxt = (id, txt) => {
         const el = document.getElementById(id);
         if (el) el.innerText = txt;
@@ -57,22 +58,19 @@ const mostrarSaldosActuales = (movements = []) => {
         setTxt('current-period-display', nominas[0].note || "Periodo Activo");
     }
 
-    // --- NUEVO: AVISO VISUAL DE ALERTAS ---
+    // Aviso visual de alertas
     const updateAlertBtn = (btnId) => {
         const btn = document.getElementById(btnId);
         if (btn) {
             if (pendingCount > 0) {
                 btn.innerHTML = `⚠️ Alertas <b>(${pendingCount})</b>`;
-                btn.style.color = "#ffd700"; // Dorado intenso
-                btn.style.fontWeight = "bold";
+                btn.style.color = "#ffd700";
             } else {
                 btn.innerHTML = `⚠️ Alertas`;
-                btn.style.color = "#ffd700"; // Normal
-                btn.style.fontWeight = "normal";
+                btn.style.color = "#ffd700";
             }
         }
     };
-
     updateAlertBtn('pc-alerts');
     updateAlertBtn('mob-alerts');
 };
@@ -103,14 +101,26 @@ document.addEventListener('DOMContentLoaded', () => {
     bindClick('pc-add-expense', () => ExpenseForm.render());
     bindClick('pc-add-income', () => IncomeForm.render(false));
     bindClick('pc-add-salary', () => IncomeForm.render(true));
-    bindClick('pc-history', () => HistoryView.render(cacheMovements));
+    
+    // CORRECCIÓN AQUÍ: Filtramos para que HistoryView no reciba 'pending' y no se rompa
+    bindClick('pc-history', () => {
+        const cleanHistory = cacheMovements.filter(m => m.type !== 'pending');
+        HistoryView.render(cleanHistory);
+    });
+
     bindClick('pc-alerts', () => AlertsView.render(cacheMovements));
 
     // --- BOTONES MÓVIL ---
     bindClick('mob-add-expense', () => { ExpenseForm.render(); closeMenu(); });
     bindClick('mob-add-income', () => { IncomeForm.render(false); closeMenu(); });
     bindClick('mob-add-salary', () => { IncomeForm.render(true); closeMenu(); });
-    bindClick('mob-history', () => { HistoryView.render(cacheMovements); closeMenu(); });
+    
+    bindClick('mob-history', () => { 
+        const cleanHistory = cacheMovements.filter(m => m.type !== 'pending');
+        HistoryView.render(cleanHistory); 
+        closeMenu(); 
+    });
+
     bindClick('mob-alerts', () => { AlertsView.render(cacheMovements); closeMenu(); });
 
     // --- ARRANQUE ---

@@ -1,10 +1,6 @@
-/**
- * Configuración de Saldos Base
- * Estos son los importes antes de la nómina de febrero 2026.
- */
-
+// PON AQUÍ TU SALDO REAL DEL BANCO
 export const InitialBalances = {
-    bbva: 40,      // Sustituye por tu cantidad real
-    ing: 4544.55,     // Sustituye por tu cantidad real
-    pension: 4553.71,    // Sustituye por tu cantidad real
+    bbva: 412.09,    // <--- Cambia esto por lo que tengas hoy en BBVA
+    ing: 4365.49,   // <--- Cambia esto por lo que tengas en ING
+    pension: 4621.04
 };
