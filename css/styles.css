@@ -9,17 +9,14 @@ html, body {
     width: 100%;
     height: 100%;
     overflow-x: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* FONDO GLOBAL (PC) */
+/* FONDO GLOBAL PETRÓLEO / CERÚLEO */
 body {
-    background-image: 
-        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-        url('../assets/images/mellon_pc.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
+    background: radial-gradient(circle at center, #004e64 0%, #002d3a 100%);
     background-attachment: fixed;
+    color: #ffffff;
 }
 
 /* PANTALLA DE BIENVENIDA */
@@ -38,6 +35,7 @@ body {
 .welcome-header { 
     width: 100%; 
     z-index: 2;
+    margin-top: 20px;
 }
 
 .welcome-title {
@@ -46,14 +44,14 @@ body {
     font-weight: 800;
     margin: 0;
     letter-spacing: -1px;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .welcome-subtitle {
-    color: #f0f0f0;
+    color: #a0ced9;
     margin-top: 10px;
     font-size: 1.2rem;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    font-weight: 300;
 }
 
 #btn-login {
@@ -61,20 +59,26 @@ body {
     align-items: center;
     gap: 12px;
     padding: 16px 32px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1);
     color: white;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
     z-index: 2;
+    backdrop-filter: blur(10px);
+}
+
+#btn-login:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 #btn-login:active { 
     transform: scale(0.95); 
-    background: rgba(255, 255, 255, 0.1); 
 }
 
 #btn-login img { 
@@ -84,18 +88,19 @@ body {
 /* SEGURIDAD Y CARGA */
 #transition-section, #pin-section {
     height: 100vh;
-    background: #ffffff;
+    background: #f4f7f6;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    color: #2c3e50;
 }
 
 .spinner {
     width: 45px; 
     height: 45px;
-    border: 5px solid #f3f3f3; 
-    border-top: 5px solid #3498db;
+    border: 5px solid #d1d8e0; 
+    border-top: 5px solid #004e64;
     border-radius: 50%; 
     animation: spin 1s linear infinite;
     margin-bottom: 20px;
@@ -121,13 +126,14 @@ body {
     display: flex; 
     flex-direction: column; 
     justify-content: space-between; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+    border: 1px solid rgba(255,255,255,0.1);
+    background: #ffffff;
 }
 
-.card.bbva { background-color: #e6f0f9; color: #004481; border-left: 6px solid #004481; }
-.card.ing { background-color: #fff0e6; color: #ff6200; border-left: 6px solid #ff6200; }
-.card.pension { background-color: #eafaf1; color: #27ae60; border-left: 6px solid #27ae60; }
+.card.bbva { border-left: 6px solid #004481; color: #004481; }
+.card.ing { border-left: 6px solid #ff6200; color: #ff6200; }
+.card.pension { border-left: 6px solid #27ae60; color: #27ae60; }
 
 .bank-logo { 
     position: absolute; 
@@ -146,39 +152,27 @@ body {
     display: none !important; 
 }
 
-/* TABLET & MOBILE (PORTRAIT) */
+/* RESPONSIVE */
 @media (orientation: portrait) and (max-width: 900px) {
-  body {
-    background-image: 
-      linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-      url('../assets/images/mellon.png');
-    background-attachment: scroll;
-  }
-
   .pc-nav-bar { display: none !important; }
   .menu-burguer-container { display: flex !important; }
-
   .dashboard-grid {
     grid-template-columns: 1fr !important;
     margin: 12px !important; 
     gap: 14px !important;
   }
-
-  .card { height: auto !important; min-height: 120px; }
+  .card { min-height: 120px; }
   .balance { font-size: 1.9rem !important; }
-  .welcome-title { font-size: 3rem; }
+  .welcome-title { font-size: 2.8rem; }
 }
 
-/* TABLET (LANDSCAPE) */
 @media (orientation: landscape) and (min-width: 1000px) {
   .pc-nav-bar { display: block !important; }
   .menu-burguer-container { display: none !important; }
   #side-menu { display: none !important; }
-
   .dashboard-grid {
     grid-template-columns: repeat(3, 1fr) !important;
     max-width: 1200px; 
     margin: 24px auto !important; 
-    gap: 22px !important;
   }
 }
