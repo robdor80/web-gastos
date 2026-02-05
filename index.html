@@ -16,44 +16,37 @@
                 <h1 class="welcome-title">Gastos Mes</h1>
                 <p class="welcome-subtitle">Control financiero familiar seguro</p>
             </div>
-            
             <div style="flex-grow: 1;"></div>
-            
             <button id="btn-login">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="Google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
                 Accede con Google
             </button>
         </section>
 
         <section id="transition-section" class="hidden">
             <div class="spinner"></div>
-            <h2 style="color: #ffffff; margin-bottom: 8px;">Verificando seguridad...</h2>
-            <p style="color: #a0ced9;">Protegiendo tus datos</p>
+            <h2 style="margin-top:20px;">Verificando...</h2>
         </section>
 
         <section id="pin-section" class="hidden">
-            <div style="text-align: center;">
-                <h2 style="color: #ffffff; margin-bottom: 10px;">PIN de Seguridad</h2>
-                <div class="pin-dots" style="display:flex; justify-content:center; gap:15px; margin:30px 0;">
-                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                </div>
-                <div class="pin-grid">
-                    <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
-                    <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
-                    <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
-                    <button class="pin-btn" style="border:none; background:none;"></button>
-                    <button class="pin-btn">0</button>
-                    <button class="pin-btn del-btn">⌫</button>
-                </div>
+            <h2 style="margin-bottom:20px;">Introduce tu PIN</h2>
+            <div class="pin-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+            <div class="pin-grid">
+                <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
+                <button class="pin-btn">4</button><button class="pin-btn">5</button><button class="pin-btn">6</button>
+                <button class="pin-btn">7</button><button class="pin-btn">8</button><button class="pin-btn">9</button>
+                <button class="pin-btn" style="visibility:hidden"></button>
+                <button class="pin-btn">0</button>
+                <button class="pin-btn del-btn">⌫</button>
             </div>
         </section>
 
         <section id="app-section" class="hidden">
             <header class="app-header">
-                <div class="menu-burguer-container" id="menu-open">
-                    <div class="menu-burguer"><span></span><span></span><span></span></div>
-                </div>
-                <div class="logo-period"><span id="current-period-display">Cargando...</span></div>
+                <div id="menu-open" style="cursor:pointer">☰</div>
+                <div id="current-period-display">Cargando...</div>
                 <div id="user-display"></div>
             </header>
             
@@ -61,37 +54,31 @@
                 <ul>
                     <li id="pc-add-expense">✏️ Gasto</li>
                     <li id="pc-add-income">💰 Ingreso</li>
-                    <li id="pc-add-salary">🏦 Nómina</li>
                     <li id="pc-history">📋 Historial</li>
-                    <li id="pc-logout" style="color: #ff4d4d;">🚪 Salir</li>
+                    <li id="pc-logout" style="color:#ff4d4d">Salir</li>
                 </ul>
             </nav>
 
             <main class="main-content">
                 <div class="dashboard-grid">
                     <div class="card bbva">
-                        <img src="assets/icons/bbva.jpg" class="bank-logo">
-                        <span class="bank-label">BBVA Principal</span>
+                        <span>BBVA Principal</span>
                         <span class="balance" id="saldo-bbva">0,00 €</span>
                     </div>
                     <div class="card ing">
-                        <img src="assets/icons/ing.jpg" class="bank-logo">
-                        <span class="bank-label">Ahorro ING</span>
+                        <span>Ahorro ING</span>
                         <span class="balance" id="saldo-ing">0,00 €</span>
                     </div>
                     <div class="card pension">
-                        <img src="assets/icons/PlanPensiones.png" class="bank-logo">
-                        <span class="bank-label">Plan Pensiones</span>
+                        <span>Plan Pensiones</span>
                         <span class="balance" id="saldo-pension">0,00 €</span>
                     </div>
                 </div>
-                <div id="dynamic-content">
-                    <p style="text-align:center; color:#ffffff; margin-top:40px; opacity: 0.6;">Selecciona una opción para empezar.</p>
-                </div>
+                <div id="dynamic-content"></div>
             </main>
         </section>
-    </div>
 
+    </div>
     <script src="js/main.js" type="module"></script>
 </body>
 </html>
