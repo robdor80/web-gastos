@@ -30,6 +30,7 @@ body {
     align-items: center;
     text-align: center;
     padding: 60px 20px;
+    background: transparent;
 }
 
 .welcome-header { 
@@ -77,30 +78,27 @@ body {
     transform: translateY(-2px);
 }
 
-#btn-login:active { 
-    transform: scale(0.95); 
-}
-
 #btn-login img { 
     filter: brightness(0) invert(1); 
 }
 
-/* SEGURIDAD Y CARGA */
+/* SEGURIDAD Y CARGA (AHORA TRANSPARENTES) */
 #transition-section, #pin-section {
     height: 100vh;
-    background: #f4f7f6;
+    width: 100%;
+    background: transparent; /* Eliminado el fondo blanco */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: #2c3e50;
+    color: #ffffff; /* Texto en blanco para el cerúleo */
 }
 
 .spinner {
     width: 45px; 
     height: 45px;
-    border: 5px solid #d1d8e0; 
-    border-top: 5px solid #004e64;
+    border: 5px solid rgba(255, 255, 255, 0.2); 
+    border-top: 5px solid #a0ced9;
     border-radius: 50%; 
     animation: spin 1s linear infinite;
     margin-bottom: 20px;
@@ -109,6 +107,22 @@ body {
 @keyframes spin { 
     0% { transform: rotate(0deg); } 
     100% { transform: rotate(360deg); } 
+}
+
+/* PIN PAD ESTILO MODERNO */
+.pin-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.dot {
+    border: 2px solid white;
+}
+
+.dot.active {
+    background-color: white;
 }
 
 /* DASHBOARD */
@@ -126,9 +140,9 @@ body {
     display: flex; 
     flex-direction: column; 
     justify-content: space-between; 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
     border: 1px solid rgba(255,255,255,0.1);
-    background: #ffffff;
+    background: #ffffff; /* Las tarjetas se mantienen blancas para legibilidad */
 }
 
 .card.bbva { border-left: 6px solid #004481; color: #004481; }
@@ -160,19 +174,5 @@ body {
     grid-template-columns: 1fr !important;
     margin: 12px !important; 
     gap: 14px !important;
-  }
-  .card { min-height: 120px; }
-  .balance { font-size: 1.9rem !important; }
-  .welcome-title { font-size: 2.8rem; }
-}
-
-@media (orientation: landscape) and (min-width: 1000px) {
-  .pc-nav-bar { display: block !important; }
-  .menu-burguer-container { display: none !important; }
-  #side-menu { display: none !important; }
-  .dashboard-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    max-width: 1200px; 
-    margin: 24px auto !important; 
   }
 }
