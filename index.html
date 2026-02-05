@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,9 +9,10 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <div id="app-container">
-        
+
         <section id="login-section">
             <div class="welcome-header">
                 <h1 class="welcome-title">Gastos Mes</h1>
@@ -18,7 +20,7 @@
             </div>
             <div style="flex-grow: 1;"></div>
             <button id="btn-login">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="Google">
                 Accede con Google
             </button>
         </section>
@@ -31,7 +33,10 @@
         <section id="pin-section" class="hidden">
             <h2 style="margin-bottom:20px;">Introduce tu PIN</h2>
             <div class="pin-dots">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
             </div>
             <div class="pin-grid">
                 <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
@@ -49,7 +54,7 @@
                 <div id="current-period-display">Cargando...</div>
                 <div id="user-display"></div>
             </header>
-            
+
             <nav class="pc-nav-bar">
                 <ul>
                     <li id="pc-add-expense">✏️ Gasto</li>
@@ -81,4 +86,5 @@
     </div>
     <script src="js/main.js" type="module"></script>
 </body>
+
 </html>
