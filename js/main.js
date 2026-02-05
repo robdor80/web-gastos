@@ -4,16 +4,17 @@ import { InitialBalances } from './config/initialBalances.js';
 import { ExpenseForm } from './components/expenseForm.js';
 import { IncomeForm } from './components/incomeForm.js';
 import { HistoryView } from './components/historyView.js';
+import { AlertsView } from './components/alertsView.js'; // <--- IMPORTANTE
 
-// Variable para guardar los movimientos y no tener que recargarlos al ver el historial
+// Caché de movimientos
 let cacheMovements = [];
 
 /**
- * 1. FUNCIÓN PARA ACTUALIZAR SALDOS
+ * 1. ACTUALIZAR SALDOS
+ * (Ignoramos los tipo 'pending' para que no afecten a la cuenta)
  */
 const mostrarSaldosActuales = (movements = []) => {
-    // Guardamos los datos en caché para usarlos en el Historial
-    cacheMovements = movements;
+    cacheMovements = movements; // Guardamos para usar en Historial y Alertas
 
     const f = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
     let sBBVA = parseFloat(InitialBalances.bbva || 0);
@@ -22,43 +23,43 @@ const mostrarSaldosActuales = (movements = []) => {
 
     if (movements && movements.length > 0) {
         movements.forEach(m => {
+            // Solo procesamos gastos, ingresos y nóminas. IGNORAMOS 'pending'.
             const cant = parseFloat(m.amount);
             if (m.type === 'expense') {
                 if (m.account === 'bbva') sBBVA -= cant; else sING -= cant;
                 if (m.category === "Plan de Pensiones") sPension += cant;
             } else if (m.type === 'income' || m.type === 'salary') {
                 if (m.account === 'bbva') sBBVA += cant; else sING += cant;
-            } else if (m.type === 'transfer') { // Por si implementas transferencias
+            } else if (m.type === 'transfer') {
                 if (m.account === 'bbva') { sBBVA -= cant; sING += cant; }
                 else { sING -= cant; sBBVA += cant; }
             }
         });
     }
 
-    // Actualizar DOM de forma segura
-    const updateText = (id, text) => {
+    // Actualizar DOM
+    const setTxt = (id, txt) => {
         const el = document.getElementById(id);
-        if (el) el.innerText = text;
+        if (el) el.innerText = txt;
     };
 
-    updateText('saldo-bbva', f.format(sBBVA));
-    updateText('saldo-ing', f.format(sING));
-    updateText('saldo-pension', f.format(sPension));
+    setTxt('saldo-bbva', f.format(sBBVA));
+    setTxt('saldo-ing', f.format(sING));
+    setTxt('saldo-pension', f.format(sPension));
     
-    // Actualizar también el periodo si hay nóminas
+    // Periodo (nómina)
     const nominas = movements.filter(m => m.type === 'salary');
     if (nominas.length > 0) {
-        updateText('current-period-display', nominas[nominas.length - 1].note || "Periodo Activo");
+        setTxt('current-period-display', nominas[nominas.length - 1].note || "Periodo Activo");
     }
 };
 
 /**
- * 2. INICIALIZACIÓN Y EVENTOS
+ * 2. INICIALIZACIÓN
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Inicializando aplicación...");
+    console.log("App iniciada.");
 
-    // Función auxiliar para asignar clicks sin errores
     const bindClick = (id, handler) => {
         const el = document.getElementById(id);
         if (el) el.onclick = handler;
@@ -69,29 +70,30 @@ document.addEventListener('DOMContentLoaded', () => {
     bindClick('pc-logout', () => AuthService.logout());
     bindClick('mob-logout', () => AuthService.logout());
 
-    // --- MENÚ LATERAL (Móvil) ---
+    // --- MENÚ MÓVIL ---
     const sideMenu = document.getElementById('side-menu');
     const closeMenu = () => sideMenu?.classList.add('hidden');
-    
     bindClick('menu-open', () => sideMenu?.classList.remove('hidden'));
     bindClick('menu-close', closeMenu);
 
-    // --- BOTONES PRINCIPALES (PC) ---
+    // --- BOTONES PC ---
     bindClick('pc-add-expense', () => ExpenseForm.render());
     bindClick('pc-add-income', () => IncomeForm.render(false));
     bindClick('pc-add-salary', () => IncomeForm.render(true));
     bindClick('pc-history', () => HistoryView.render(cacheMovements));
+    bindClick('pc-alerts', () => AlertsView.render(cacheMovements)); // <--- NUEVO
 
-    // --- BOTONES PRINCIPALES (Móvil - cierran el menú al clicar) ---
+    // --- BOTONES MÓVIL ---
     bindClick('mob-add-expense', () => { ExpenseForm.render(); closeMenu(); });
     bindClick('mob-add-income', () => { IncomeForm.render(false); closeMenu(); });
     bindClick('mob-add-salary', () => { IncomeForm.render(true); closeMenu(); });
     bindClick('mob-history', () => { HistoryView.render(cacheMovements); closeMenu(); });
+    bindClick('mob-alerts', () => { AlertsView.render(cacheMovements); closeMenu(); }); // <--- NUEVO
 
-    // --- INICIO DE SEGURIDAD ---
+    // --- ARRANQUE ---
     try {
         AuthGuard.verifyAccess(mostrarSaldosActuales);
-    } catch (error) {
-        console.error("Error crítico en inicio:", error);
+    } catch (e) {
+        console.error("Error arranque:", e);
     }
 });

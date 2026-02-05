@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gastos Mes - Seguridad Nivel 3</title>
+    <title>Gastos Mes</title>
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
     <div id="app-container">
-
+        
         <section id="login-section">
             <div class="welcome-header">
                 <h1 class="welcome-title">Gastos Mes</h1>
@@ -27,16 +25,13 @@
 
         <section id="transition-section" class="hidden">
             <div class="spinner"></div>
-            <h2 style="margin-top:20px;">Verificando...</h2>
+            <p style="margin-top:20px;">Verificando...</p>
         </section>
 
         <section id="pin-section" class="hidden">
             <h2 style="margin-bottom:20px;">Introduce tu PIN</h2>
             <div class="pin-dots">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
             </div>
             <div class="pin-grid">
                 <button class="pin-btn">1</button><button class="pin-btn">2</button><button class="pin-btn">3</button>
@@ -50,41 +45,59 @@
 
         <section id="app-section" class="hidden">
             <header class="app-header">
-                <div id="menu-open" style="cursor:pointer">☰</div>
-                <div id="current-period-display">Cargando...</div>
+                <div id="menu-open" style="cursor:pointer; font-size:1.5rem;">☰</div>
+                <div id="current-period-display" style="font-weight:bold;">Cargando...</div>
                 <div id="user-display"></div>
             </header>
-
+            
             <nav class="pc-nav-bar">
                 <ul>
                     <li id="pc-add-expense">✏️ Gasto</li>
                     <li id="pc-add-income">💰 Ingreso</li>
-                    <li id="pc-history">📋 Historial</li>
-                    <li id="pc-logout" style="color:#ff4d4d">Salir</li>
+                    <li id="pc-add-salary">🏦 Nómina</li>
+                    <li id="pc-alerts" style="color: #ffd700;">⚠️ Alertas</li> <li id="pc-history">📋 Historial</li>
+                    <li id="pc-logout" style="color:#ff4d4d; cursor:pointer;">Salir</li>
                 </ul>
             </nav>
 
             <main class="main-content">
                 <div class="dashboard-grid">
                     <div class="card bbva">
+                        <img src="assets/icons/bbva.jpg" class="bank-logo">
                         <span>BBVA Principal</span>
-                        <span class="balance" id="saldo-bbva">0,00 €</span>
+                        <span class="balance" id="saldo-bbva">...</span>
                     </div>
                     <div class="card ing">
+                        <img src="assets/icons/ing.jpg" class="bank-logo">
                         <span>Ahorro ING</span>
-                        <span class="balance" id="saldo-ing">0,00 €</span>
+                        <span class="balance" id="saldo-ing">...</span>
                     </div>
                     <div class="card pension">
+                        <img src="assets/icons/PlanPensiones.png" class="bank-logo">
                         <span>Plan Pensiones</span>
-                        <span class="balance" id="saldo-pension">0,00 €</span>
+                        <span class="balance" id="saldo-pension">...</span>
                     </div>
                 </div>
                 <div id="dynamic-content"></div>
             </main>
+
+            <aside id="side-menu" class="side-menu-overlay hidden">
+                <div class="side-menu-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                        <h3>Menú</h3><button id="menu-close" style="background:none; border:none; font-size:1.8rem; color:white;">✕</button>
+                    </div>
+                    <nav>
+                        <div class="nav-item" id="mob-add-expense">✏️ Gasto</div>
+                        <div class="nav-item" id="mob-add-income">💰 Ingreso</div>
+                        <div class="nav-item" id="mob-add-salary">🏦 Nómina</div>
+                        <div class="nav-item" id="mob-alerts" style="color: #ffd700;">⚠️ Alertas</div> <div class="nav-item" id="mob-history">📋 Historial</div>
+                        <div class="nav-item" id="mob-logout" style="color: #ff4d4d; margin-top:20px;">🚪 Salir</div>
+                    </nav>
+                </div>
+            </aside>
         </section>
 
     </div>
     <script src="js/main.js" type="module"></script>
 </body>
-
 </html>
